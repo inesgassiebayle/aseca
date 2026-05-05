@@ -1,14 +1,22 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.api.v1.endpoints import auth, portfolio, operations, watchlist, edgar, prices
 from app.core.config import settings
 from app.db.session import Base, engine
+from app.models import models  # noqa: F401
 
-Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
 
 app = FastAPI(
     title="ASECA API",
     version="0.1.0",
     description="Portfolio tracker integrating SEC EDGAR and Yahoo Finance",
+    lifespan=lifespan,
 )
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])

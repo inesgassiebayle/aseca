@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./dev.db"
     SECRET_KEY: str = "changeme-in-production"
     EDGAR_USER_AGENT: str = "Aseca dev@aseca.com"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
 
 
 settings = Settings()

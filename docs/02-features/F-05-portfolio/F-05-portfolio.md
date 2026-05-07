@@ -15,6 +15,16 @@ desde acá es **ver** su cartera completa y el valor actualizado de cada posici�
 
 ---
 
+## Criterios de aceptación
+
+- Se muestra el listado completo de posiciones con: ticker, cantidad, precio de compra promedio, precio actual y P&L.
+- El precio actual corresponde al último valor persistido por el batch (nunca en tiempo real).
+- Se muestra la fecha y hora de la última actualización de precios.
+- Si el portfolio no tiene posiciones, se muestra un estado vacío.
+- Se puede consultar el detalle de una posición individual con su historial de operaciones asociado.
+
+---
+
 ## User stories
 
 - US-12 — Ver portfolio

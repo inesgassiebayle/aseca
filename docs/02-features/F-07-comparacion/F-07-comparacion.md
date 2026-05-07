@@ -10,6 +10,17 @@ mostrando en paralelo las métricas fundamentales de las empresas seleccionadas.
 
 ---
 
+## Criterios de aceptación
+
+- Se pueden seleccionar 2 o más empresas de la watchlist del usuario para comparar.
+- Se muestran en paralelo las métricas: Revenue, Net Income, EPS, Total Assets y Total Liabilities.
+- Si una empresa no tiene datos para una métrica, se muestra "No disponible".
+- Se puede seleccionar una métrica y ver su evolución por quarters (últimos 4 a 8) para cada empresa seleccionada.
+- Los datos provienen de EDGAR respetando el rate limit de 10 requests/segundo.
+- Las respuestas de EDGAR se cachean por 1 hora.
+
+---
+
 ## User stories
 
 - US-17 — Comparar métricas entre empresas de la watchlist

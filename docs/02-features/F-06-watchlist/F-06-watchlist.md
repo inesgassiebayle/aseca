@@ -12,6 +12,18 @@ precio actual de empresas que sigue pero no posee.
 
 ---
 
+## Criterios de aceptación
+
+- Un usuario puede agregar tickers a su watchlist sin necesidad de tener posición comprada.
+- No se permite agregar el mismo ticker dos veces a la misma watchlist.
+- Un usuario puede eliminar un ticker de su watchlist; si no existe, se retorna error descriptivo.
+- La watchlist muestra el último precio almacenado para cada ticker.
+- Si un ticker no tiene precio almacenado aún, se indica claramente.
+- Los tickers de la watchlist se incluyen en el proceso batch de actualización de precios.
+- Se muestra la fecha y hora de la última actualización de precios.
+
+---
+
 ## User stories
 
 - US-14 — Agregar empresa a la watchlist

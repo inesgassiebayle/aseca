@@ -15,6 +15,18 @@ El sistema mantiene un historial completo e inmutable de todas las transacciones
 
 ---
 
+## Criterios de aceptación
+
+- Un usuario autenticado puede registrar una compra de acciones si el ticker existe y tiene precio almacenado.
+- Un usuario autenticado puede registrar una venta siempre que posea suficientes acciones del ticker.
+- No es posible vender más acciones de las disponibles en el portfolio.
+- Cada operación queda registrada con ticker, cantidad, precio vigente y timestamp.
+- El portfolio se actualiza automáticamente tras cada compra o venta.
+- El historial completo de operaciones es consultable ordenado por fecha descendente.
+- El historial puede filtrarse por ticker.
+
+---
+
 ## User stories
 
 - US-09 — Comprar acciones

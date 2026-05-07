@@ -16,6 +16,18 @@ EDGAR no provee precios de mercado. Su rol en el sistema es proveer:
 > No requiere API key ni registro.
 
 ---
+
+## Criterios de aceptación
+
+- El sistema permite buscar empresas por nombre parcial o ticker exacto, mostrando nombre, ticker y CIK.
+- Se muestran las métricas financieras del período más reciente: Revenue, Net Income, EPS, Total Assets y Total Liabilities.
+- Se muestran los filings 10-K y 10-Q con tipo, fecha y enlace al documento en EDGAR.
+- Se muestra la evolución histórica de una métrica seleccionada para los últimos 4 a 8 quarters.
+- Los resultados de EDGAR se cachean por 1 hora para no exceder el rate limit.
+- Cada request a EDGAR incluye el header `User-Agent` requerido.
+- Si una empresa no tiene datos disponibles para una consulta, se muestra un mensaje informativo.
+
+---
 ## User stories
 - US-03 — Buscar empresa por nombre o ticker
 - US-04 — Ver métricas financieras de una empresa

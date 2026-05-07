@@ -21,6 +21,17 @@ El proceso puede ejecutarse:
 
 ---
 
+## Criterios de aceptación
+
+- El proceso batch consulta Yahoo Finance para todos los tickers activos en portfolios y watchlists.
+- Cada precio obtenido se persiste en la DB junto con su timestamp de actualización.
+- Un fallo en un ticker individual no interrumpe el proceso; el error se registra y continúa.
+- Al finalizar, el proceso reporta cuántos tickers se actualizaron y cuántos fallaron.
+- La app muestra la fecha y hora del último batch exitoso en portfolio y watchlist.
+- Si el batch nunca fue ejecutado, se indica que no hay precios disponibles.
+
+---
+
 ## User stories
 
 - US-07 — Ejecutar actualización de precios (batch)

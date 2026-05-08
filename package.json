@@ -1,0 +1,17 @@
+{
+  "name": "aseca",
+  "private": true,
+  "workspaces": [
+    "web",
+    "mobile",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w @aseca/web",
+    "dev:mobile": "npm run start -w @aseca/mobile",
+    "build": "npm run build -w @aseca/shared && npm run build -w @aseca/web",
+    "test:web": "npm run test:e2e -w @aseca/web",
+    "test:mobile": "npm run test -w @aseca/mobile",
+    "test:appium": "npm run test:appium -w @aseca/mobile"
+  }
+}

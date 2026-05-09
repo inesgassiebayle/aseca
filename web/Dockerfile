@@ -7,6 +7,9 @@ RUN npm ci
 
 FROM node:20-alpine AS builder
 WORKDIR /app
+
+COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/package-lock.json ./package-lock.json
 COPY --from=deps /app/node_modules ./node_modules
 COPY packages/shared ./packages/shared
 COPY web ./web

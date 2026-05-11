@@ -14,26 +14,66 @@ on:
     - cron: "0 8 * * 1"
 
 jobs:
-  test:
-    name: Build & Test
+  test-api:
+    name: Test API
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements-dev.txt
+        run: pip install -r requirements-dev.txt
 
       - name: Run unit tests
-        run: |
-          pytest tests/unit -v
+        run: pytest tests/unit -v
+
+  test-web:
+    name: Test Web (Cypress)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: web
+          build: npm run build
+          start: npm start
+          wait-on: "http://localhost:3000"
+          install: false
+
+  test-mobile:
+    name: Test Mobile (Appium)
+    runs-on: ubuntu-latest
+    if: ${{ false }}  # requires Android emulator or BrowserStack — enable when ready
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start Appium server
+        run: npx appium &
+
+      - name: Run Appium tests
+        run: npm run test:appium -w @aseca/mobile
 
   weekly-staging-merge:
     name: Merge staging → main (weekly)
@@ -63,9 +103,9 @@ jobs:
           || echo "PR already exists or staging is up to date with main."
 
   docker:
-    name: Build & Push Docker Image
+    name: Build & Push Docker Images
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test-api, test-web]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     permissions:
@@ -100,14 +140,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push API image
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/aseca-api:latest
             ghcr.io/${{ github.repository_owner }}/aseca-api:${{ steps.semver.outputs.next }}
+
+      - name: Build and push Web image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./web/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/aseca-web:latest
+            ghcr.io/${{ github.repository_owner }}/aseca-web:${{ steps.semver.outputs.next }}
 
       - name: Create Git tag
         run: |

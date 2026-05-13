@@ -15,6 +15,8 @@ describe("Register page", () => {
     cy.contains("Sign in").should("have.attr", "href", "/login");
   });
 
+
+
   it("shows error when passwords don't match", () => {
     cy.get('input[type="email"]').type("test@example.com");
     cy.get('input[type="password"]').first().type("Password123!");

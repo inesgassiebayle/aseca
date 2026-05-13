@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "aseca",
+    "slug": "aseca",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "aseca",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aseca.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.aseca.mobile"
+    },
+    "plugins": ["expo-router"]
+  }
+}

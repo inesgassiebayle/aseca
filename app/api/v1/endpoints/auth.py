@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import EmailAlreadyExistsError, WeakPasswordError
+from app.core.exceptions import EmailAlreadyExistsError, WeakPasswordError, InvalidCredentialsError
 from app.db.session import get_db
 from app.services.auth_service import AuthService
 
@@ -13,6 +13,9 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -27,3 +30,13 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     except WeakPasswordError as e:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+
+@router.post("/login", response_model=TokenResponse)
+def login(body: LoginRequest, db: Session = Depends(get_db)):
+    try:
+        return AuthService(db).login(email=body.email, password=body.password)
+    except InvalidCredentialsError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e)
+        )

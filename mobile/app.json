@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "scheme": "aseca",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.aseca.mobile"

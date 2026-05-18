@@ -4,6 +4,7 @@ COPY package.json package-lock.json* ./
 COPY packages/shared/package.json ./packages/shared/
 COPY mobile/package.json ./mobile/
 RUN npm ci --legacy-peer-deps
+RUN npm install schema-utils --legacy-peer-deps
 COPY packages/shared ./packages/shared
 COPY mobile ./mobile
 WORKDIR /app/mobile

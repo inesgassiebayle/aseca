@@ -11,8 +11,6 @@
     "@types/react": "~18.3.12"
   },
   "dependencies": {
-    "expo": "^55.0.24",
-    "expo-asset": "~10.0.0",
     "schema-utils": "^4.3.3"
   },
   "scripts": {

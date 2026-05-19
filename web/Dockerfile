@@ -1,13 +1,14 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
+ENV CYPRESS_INSTALL_BINARY=0
 COPY package.json package-lock.json* ./
 COPY packages/shared/package.json ./packages/shared/
 COPY web/package.json ./web/
-RUN npm ci
+COPY mobile/package.json ./mobile/
+RUN npm ci --legacy-peer-deps
 
 FROM node:20-alpine AS builder
 WORKDIR /app
-
 COPY --from=deps /app/package.json ./package.json
 COPY --from=deps /app/package-lock.json ./package-lock.json
 COPY --from=deps /app/node_modules ./node_modules

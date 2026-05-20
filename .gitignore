@@ -45,5 +45,6 @@ postgres_data/
 node_modules
 **/node_modules
 .next
+web/.next
 dist
 coverage

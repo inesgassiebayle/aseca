@@ -1,7 +1,7 @@
 export default function Home() {
   return (
     <main>
-      <h1>Aseca</h1>
+      <h1>StockWatch</h1>
     </main>
   );
 }

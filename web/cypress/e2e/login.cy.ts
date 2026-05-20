@@ -30,7 +30,7 @@ describe("Login page", () => {
       password: "Password123!",
     });
 
-    cy.url().should("eq", Cypress.config("baseUrl") + "/");
+    cy.url().should("eq", Cypress.config("baseUrl") + "/search");
     cy.window().its("localStorage").invoke("getItem", "access_token").should("eq", "fake-token");
   });
 

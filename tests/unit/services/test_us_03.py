@@ -45,23 +45,28 @@ class TestBusquedaEmpresaPorTicker:
 
         results = edgar_service.search_companies("AAPL")
 
-        assert len(results) == 1
-        assert results[0]["ticker"] == "AAPL"
+        assert any(r["ticker"] == "AAPL" for r in results)
+
+    def test_busqueda_ticker_parcial_retorna_coincidencias(self, edgar_service, mock_http_client):
+        mock_http_client.get.return_value.json.return_value = MOCK_TICKERS
+
+        results = edgar_service.search_companies("AAP")
+
+        assert any(r["ticker"] == "AAPL" for r in results)
 
     def test_busqueda_ticker_minusculas_retorna_empresa(self, edgar_service, mock_http_client):
         mock_http_client.get.return_value.json.return_value = MOCK_TICKERS
 
         results = edgar_service.search_companies("aapl")
 
-        assert len(results) == 1
-        assert results[0]["ticker"] == "AAPL"
+        assert any(r["ticker"] == "AAPL" for r in results)
 
-    def test_busqueda_ticker_no_retorna_coincidencias_parciales(self, edgar_service, mock_http_client):
+    def test_busqueda_ticker_parcial_minusculas(self, edgar_service, mock_http_client):
         mock_http_client.get.return_value.json.return_value = MOCK_TICKERS
 
-        results = edgar_service.search_companies("AAP")
+        results = edgar_service.search_companies("msf")
 
-        assert all(r["ticker"] != "AAPL" for r in results)
+        assert any(r["ticker"] == "MSFT" for r in results)
 
 
 class TestBusquedaSinResultados:

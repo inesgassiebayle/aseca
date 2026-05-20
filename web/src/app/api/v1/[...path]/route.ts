@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 const API_URL = process.env.API_URL ?? "http://localhost:8000";
 
 async function proxy(request: NextRequest, path: string[]) {
-  const url = `${API_URL}/api/v1/${path.join("/")}`;
+  const qs = request.nextUrl.searchParams.toString();
+  const url = `${API_URL}/api/v1/${path.join("/")}${qs ? `?${qs}` : ""}`;
   const res = await fetch(url, {
     method: request.method,
     headers: { "Content-Type": "application/json" },

@@ -41,7 +41,7 @@ class EdgarService:
             name: str = entry["title"]
             cik: int = entry["cik_str"]
 
-            if ticker.upper() == query_upper or query_lower in name.lower():
+            if query_upper in ticker.upper() or query_lower in name.lower():
                 results.append({"name": name, "ticker": ticker, "cik": cik})
 
         return results

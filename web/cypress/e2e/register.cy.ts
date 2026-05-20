@@ -25,7 +25,7 @@ describe("Register page", () => {
     cy.contains("Passwords don't match").should("be.visible");
   });
 
-  it("redirects to /login on successful registration", () => {
+  it("logs in and redirects to / on successful registration", () => {
     cy.intercept("POST", "/api/v1/auth/register", {
       statusCode: 201,
       body: { access_token: "fake-token", token_type: "bearer" },
@@ -41,7 +41,8 @@ describe("Register page", () => {
       password: "Password123!",
     });
 
-    cy.url().should("include", "/login");
+    cy.window().its("localStorage").invoke("getItem", "access_token").should("eq", "fake-token");
+    cy.url().should("not.include", "/login");
   });
 
   it("shows server error message on failed registration", () => {

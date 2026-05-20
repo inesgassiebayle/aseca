@@ -14,7 +14,7 @@ EDGAR provee:
 Yahoo Finance provee:
 - Precio de cierre más reciente por ticker.
 
-Los precios se obtienen mediante un proceso batch independiente y se almacenan en la base de datos.
+Los precios se obtienen mediante un proceso batch independiente que opera sobre una **lista blanca** de tickers conocidos del sistema, y se almacenan en la base de datos.
 Toda la lógica de valorización (portfolio, P&L) se calcula únicamente contra los precios almacenados.
 
 El proceso batch puede ejecutarse:

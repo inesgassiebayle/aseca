@@ -191,3 +191,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a ${{ steps.semver.outputs.next }} -m "ci: release ${{ steps.semver.outputs.next }}"
           git push origin ${{ steps.semver.outputs.next }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.semver.outputs.next }}
+          name: Release ${{ steps.semver.outputs.next }}
+          generate_release_notes: true

@@ -4,7 +4,7 @@
 > para analizar su situación financiera actual.
 
 **Criterios de aceptación:**
-- Se muestra el precio de la acción almacenado en el sistema (del batch), junto con la fecha y hora de esa actualización. Si el ticker no está en ningún portfolio ni watchlist, el precio no estará disponible.
+- Se muestra el precio de la acción almacenado en el sistema (del batch), junto con la fecha y hora de esa actualización. Si el ticker no pertenece a la lista blanca del sistema, el precio no estará disponible.
 - Se consulta la API de EDGAR para obtener las métricas financieras de la empresa.
 - Se muestran: Revenue, Net Income, EPS, Total Assets, Total Liabilities del período más reciente.
 - Los datos provienen de la XBRL Company Facts API de EDGAR.

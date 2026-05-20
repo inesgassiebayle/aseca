@@ -6,4 +6,4 @@
 **Criterios de aceptación:**
 - Se puede agregar por ticker.
 - No se puede agregar el mismo ticker dos veces.
-- El ticker queda incluido en el próximo batch de actualización de precios.
+- Si el ticker pertenece a la lista blanca del sistema, su precio estará disponible en la watchlist tras el próximo batch.

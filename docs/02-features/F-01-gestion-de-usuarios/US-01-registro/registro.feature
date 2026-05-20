@@ -16,5 +16,5 @@ Feature: Registro de usuario
     Given que el email "usuario@mail.com" no está registrado
     And la contraseña "123" no cumple con los requisitos de seguridad
     When el usuario envía email "usuario@mail.com" y password "123"
-    Then el sistema retorna un error 409
+    Then el sistema retorna un error 422
     And el mensaje indica que la contraseña es demasiado débil

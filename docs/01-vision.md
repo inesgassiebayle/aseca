@@ -44,7 +44,7 @@ conectada a datos reales para:
 | **API Backend** | Núcleo del sistema. Expone los endpoints consumidos por la app web y la app mobile. |
 | **App Web** | Interfaz para usar desde el navegador. |
 | **App Mobile** | Interfaz para dispositivos Android. |
-| **Proceso Batch de Precios** | Script independiente que consulta Yahoo Finance y persiste precios en la base de datos. Se ejecuta manualmente o desde CI. No corre en tiempo real. |
+| **Proceso Batch de Precios** | Script independiente que consulta Yahoo Finance para una lista blanca de tickers conocidos y persiste precios en la base de datos. Se ejecuta manualmente o desde CI. No corre en tiempo real. |
 
 ---
 
@@ -85,7 +85,7 @@ Usuario
         └── Datos vienen de EDGAR (con cache de 1 hora)
 
 Proceso Batch (ejecución manual o CI)
-  └── Consulta Yahoo Finance → persiste precios en DB
+  └── Itera lista blanca de tickers → consulta Yahoo Finance → persiste precios en DB
 ```
 
 ---

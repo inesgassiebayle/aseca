@@ -6,9 +6,9 @@ La watchlist permite al usuario hacer **seguimiento de empresas de interés**
 sin necesidad de tener una posición comprada en ellas.
 
 Es una lista personal donde el usuario puede agregar y quitar tickers.
-Los tickers en la watchlist son incluidos en el proceso batch de actualización
-de precios (F-02), por lo que el usuario puede ver el precio actual de empresas
-que sigue pero no posee.
+El precio de cada ticker en la watchlist se obtiene del proceso batch (F-02),
+que opera sobre la lista blanca del sistema. Si el ticker pertenece a la lista blanca,
+el usuario verá su precio actualizado; si no pertenece, el precio no estará disponible.
 
 Desde la watchlist el usuario también puede **comparar métricas financieras**
 entre las empresas que sigue, utilizando datos de EDGAR.

@@ -24,6 +24,26 @@ def db():
 def auth_service(db):
     return AuthService(db)
 
+
+@pytest.fixture
+def mock_http_client():
+    return MagicMock()
+
+
+@pytest.fixture
+def edgar_service(mock_http_client):
+    from app.services.edgar_service import EdgarService
+    return EdgarService(mock_http_client)
+
+
+@pytest.fixture
+def edgar_client():
+    from app.api.v1.endpoints.edgar import get_edgar_service
+    mock_service = MagicMock()
+    app.dependency_overrides[get_edgar_service] = lambda: mock_service
+    yield TestClient(app), mock_service
+    app.dependency_overrides.clear()
+
 @pytest.fixture
 def portfolio_service(db):
     return PortfolioService(db)

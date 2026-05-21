@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from app.main import app
 from app.services.auth_service import AuthService
 from app.db.session import get_db
+from app.services.portfolio_service import PortfolioService
 
 
 @pytest.fixture
@@ -22,3 +23,7 @@ def db():
 @pytest.fixture
 def auth_service(db):
     return AuthService(db)
+
+@pytest.fixture
+def portfolio_service(db):
+    return PortfolioService(db)

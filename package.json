@@ -11,6 +11,7 @@
     "@types/react": "~18.3.12"
   },
   "dependencies": {
+    "expo-router": "^56.2.5",
     "schema-utils": "^4.3.3"
   },
   "scripts": {

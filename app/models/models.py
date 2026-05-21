@@ -49,3 +49,11 @@ class WatchlistItem(Base):
     ticker = Column(String, nullable=False)
 
     owner = relationship("User", back_populates="watchlist")
+
+class StockPrice(Base):
+    __tablename__ = "stock_prices"
+
+    id = Column(Integer, primary_key=True)
+    ticker = Column(String, nullable=False, unique=True)
+    price = Column(Float, nullable=False)
+    updated_at = Column(DateTime, nullable=False)

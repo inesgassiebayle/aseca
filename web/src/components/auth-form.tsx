@@ -38,7 +38,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       const data = await res.json();
       localStorage.setItem("access_token", data.access_token);
-      router.push("/");
+      router.push("/portfolio");
     } catch {
       setError("Network error, please try again");
     } finally {

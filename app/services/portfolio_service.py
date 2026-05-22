@@ -46,37 +46,37 @@ class PortfolioService:
         self.db.refresh(operation)
         return operation
 
-def sell(self, user_id: int, ticker: str, quantity: float) -> Operation:
-    price_row = self.db.query(StockPrice).filter(StockPrice.ticker == ticker).first()
-    if not price_row:
-        raise TickerNotFoundError(f"No hay precio almacenado para {ticker}")
+    def sell(self, user_id: int, ticker: str, quantity: float) -> Operation:
+        price_row = self.db.query(StockPrice).filter(StockPrice.ticker == ticker).first()
+        if not price_row:
+            raise TickerNotFoundError(f"No hay precio almacenado para {ticker}")
 
-    position = self.db.query(Position).filter(
-        Position.user_id == user_id,
-        Position.ticker == ticker,
-        ).first()
+        position = self.db.query(Position).filter(
+            Position.user_id == user_id,
+            Position.ticker == ticker,
+            ).first()
 
-    if not position:
-        raise InsufficientSharesError(f"No tenés posición en {ticker}")
+        if not position:
+            raise InsufficientSharesError(f"No tenés posición en {ticker}")
 
-    if quantity > position.quantity:
-        raise InsufficientSharesError(f"Cantidad insuficiente para {ticker}")
+        if quantity > position.quantity:
+            raise InsufficientSharesError(f"Cantidad insuficiente para {ticker}")
 
-    operation = Operation(
-        user_id=user_id,
-        ticker=ticker,
-        type="sell",
-        quantity=quantity,
-        price=price_row.price,
-        executed_at=datetime.now(timezone.utc),
-    )
-    self.db.add(operation)
+        operation = Operation(
+            user_id=user_id,
+            ticker=ticker,
+            type="sell",
+            quantity=quantity,
+            price=price_row.price,
+            executed_at=datetime.now(timezone.utc),
+        )
+        self.db.add(operation)
 
-    if position.quantity == quantity:
-        self.db.delete(position)
-    else:
-        position.quantity -= quantity
+        if position.quantity == quantity:
+            self.db.delete(position)
+        else:
+            position.quantity -= quantity
 
-    self.db.commit()
-    self.db.refresh(operation)
-    return operation
+        self.db.commit()
+        self.db.refresh(operation)
+        return operation

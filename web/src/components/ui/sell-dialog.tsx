@@ -1,57 +1,50 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 type Props = {
-    open: boolean;
+    ticker: string | null;
     onClose: () => void;
     onSuccess: () => void;
-    defaultTicker?: string;
 };
 
-export function BuyDialog({ open, onClose, onSuccess, defaultTicker }: Props) {
-    const [ticker, setTicker] = useState(defaultTicker ?? "");
+export function SellDialog({ ticker, onClose, onSuccess }: Props) {
     const [quantity, setQuantity] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        setTicker(defaultTicker ?? "");
-    }, [defaultTicker]);
-
-    if (!open) return null;
+    if (!ticker) return null;
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError(null);
 
-        if (!ticker || !quantity || Number(quantity) <= 0) {
-            setError("Completá todos los campos correctamente.");
+        if (!quantity || Number(quantity) <= 0) {
+            setError("Ingresá una cantidad válida.");
             return;
         }
 
         setLoading(true);
         try {
             const token = localStorage.getItem("access_token");
-            const res = await fetch("/api/v1/portfolio/buy", {
+            const res = await fetch("/api/v1/portfolio/sell", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    ticker: ticker.toUpperCase(),
+                    ticker,
                     quantity: Number(quantity),
                 }),
             });
 
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}));
-                setError(data.detail ?? "No se pudo registrar la compra.");
+                setError(data.detail ?? "No se pudo registrar la venta.");
                 return;
             }
 
-            setTicker(defaultTicker ?? "");
             setQuantity("");
             onSuccess();
             onClose();
@@ -74,23 +67,8 @@ export function BuyDialog({ open, onClose, onSuccess, defaultTicker }: Props) {
             >
                 <div>
                     <div className="chip mb-3">Trade</div>
-                    <h2 className="display text-3xl">Comprar acciones</h2>
+                    <h2 className="display text-3xl">Vender <span className="mono">{ticker}</span></h2>
                 </div>
-
-                <label className="block">
-                    <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                        Ticker
-                    </span>
-                    <input
-                        type="text"
-                        placeholder="AAPL"
-                        value={ticker}
-                        onChange={(e) => setTicker(e.target.value)}
-                        required
-                        disabled={!!defaultTicker}
-                        className="w-full mt-1.5 bg-surface border border-hairline rounded-xl px-3 py-2.5 text-sm mono focus:outline-none focus:border-primary placeholder:text-muted-foreground/50 disabled:opacity-50"
-                    />
-                </label>
 
                 <label className="block">
                     <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -122,9 +100,9 @@ export function BuyDialog({ open, onClose, onSuccess, defaultTicker }: Props) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-full text-[13px] font-medium glow-primary disabled:opacity-50"
+                        className="flex-1 bg-negative text-white py-2.5 rounded-full text-[13px] font-medium disabled:opacity-50"
                     >
-                        {loading ? "Procesando…" : "Confirmar"}
+                        {loading ? "Procesando…" : "Confirmar venta"}
                     </button>
                 </div>
             </form>

@@ -58,3 +58,18 @@ class EdgarService:
         data = response.json()
         self.cache.set(data)
         return data
+
+    def get_company(self, ticker: str) -> dict | None:
+        data = self._get_tickers()
+        ticker_upper = ticker.upper()
+
+        for entry in data.values():
+            if entry["ticker"].upper() == ticker_upper:
+                return {
+                    "ticker": entry["ticker"],
+                    "name": entry["title"],
+                    "cik": str(entry["cik_str"]).zfill(10),
+                    "price": None,
+                    "updated_at": None,
+                }
+        return None

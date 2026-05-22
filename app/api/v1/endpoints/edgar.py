@@ -25,3 +25,23 @@ def search_companies(
     service: EdgarService = Depends(get_edgar_service),
 ):
     return service.search_companies(q)
+
+from fastapi import HTTPException
+from typing import Optional
+
+class CompanyDetail(BaseModel):
+    ticker: str
+    name: str
+    cik: str
+    price: Optional[float]
+    updated_at: Optional[str]
+
+@router.get("/company/{ticker}", response_model=CompanyDetail)
+def get_company(
+        ticker: str,
+        service: EdgarService = Depends(get_edgar_service),
+):
+    company = service.get_company(ticker)
+    if not company:
+        raise HTTPException(status_code=404, detail=f"Empresa {ticker} no encontrada")
+    return company

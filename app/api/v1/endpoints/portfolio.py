@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from app.core.dependencies import get_current_user
-from app.core.exceptions import TickerNotFoundError
+from app.core.exceptions import TickerNotFoundError, InsufficientSharesError
 from app.db.session import get_db
 from app.models.models import User, Position
 from app.services.portfolio_service import PortfolioService
@@ -55,3 +55,24 @@ def get_portfolio(
 ):
     positions = db.query(Position).filter(Position.user_id == current_user.id).all()
     return positions
+
+class SellRequest(BaseModel):
+    ticker: str
+    quantity: float
+
+@router.post("/sell", response_model=OperationResponse, status_code=status.HTTP_201_CREATED)
+def sell(
+        body: SellRequest,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+):
+    try:
+        return PortfolioService(db).sell(
+            user_id=current_user.id,
+            ticker=body.ticker,
+            quantity=body.quantity,
+        )
+    except TickerNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+    except InsufficientSharesError as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))

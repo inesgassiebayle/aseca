@@ -89,6 +89,10 @@ class PortfolioService:
         for p in positions:
             price_row = self.db.query(StockPrice).filter(StockPrice.ticker == p.ticker).first()
             current_price = price_row.price if price_row else None
+
+            pnl = (current_price - p.avg_price) * p.quantity if current_price else None
+            pnl_pct = ((current_price - p.avg_price) / p.avg_price) * 100 if current_price else None
+
             result.append({
                 "id": p.id,
                 "ticker": p.ticker,
@@ -97,6 +101,8 @@ class PortfolioService:
                 "current_price": current_price,
                 "current_value": current_price * p.quantity if current_price else None,
                 "price_updated_at": price_row.updated_at if price_row else None,
+                "pnl": pnl,
+                "pnl_pct": pnl_pct,
             })
         return result
 

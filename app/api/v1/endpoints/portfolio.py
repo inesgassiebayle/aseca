@@ -43,6 +43,8 @@ class PositionResponse(BaseModel):
     current_price: Optional[float] = None
     current_value: Optional[float] = None
     price_updated_at: Optional[datetime] = None
+    pnl: Optional[float] = None
+    pnl_pct: Optional[float] = None
 
     model_config = {"from_attributes": True}
 

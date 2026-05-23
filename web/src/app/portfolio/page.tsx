@@ -12,6 +12,8 @@ type Position = {
     current_price: number | null;
     current_value: number | null;
     price_updated_at: string | null;
+    pnl: number | null;
+    pnl_pct: number | null;
 };
 
 function fmtMoney(n: number) {
@@ -79,11 +81,12 @@ export default function PortfolioPage() {
             {error && <p className="text-[13px] text-negative">{error}</p>}
 
             <div className="card-modern overflow-hidden">
-                <div className="hidden md:grid grid-cols-[1.5fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-hairline">
+                <div className="hidden md:grid grid-cols-[1.5fr_0.8fr_0.8fr_1fr_1fr] gap-4 px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-hairline">
                     <span>Asset</span>
                     <span className="text-right">Qty</span>
                     <span className="text-right">Avg cost</span>
                     <span className="text-right">Value</span>
+                    <span className="text-right">P&L</span>
                 </div>
 
                 {positions.length === 0 && (
@@ -96,7 +99,7 @@ export default function PortfolioPage() {
                     <Link
                         key={p.id}
                         href={`/portfolio/${p.ticker}`}
-                        className="grid md:grid-cols-[1.5fr_0.8fr_0.8fr_1fr] grid-cols-[1fr_1fr] gap-3 px-5 py-4 border-b border-hairline last:border-0 hover:bg-surface-elevated/60 transition-colors"
+                        className="grid md:grid-cols-[1.5fr_0.8fr_0.8fr_1fr_1fr] grid-cols-[1fr_1fr] gap-3 px-5 py-4 border-b border-hairline last:border-0 hover:bg-surface-elevated/60 transition-colors"
                     >
                         <div className="flex items-center gap-3">
                             <div className="size-9 rounded-xl bg-surface-elevated border border-hairline flex items-center justify-center mono text-[11px] shrink-0">
@@ -110,6 +113,20 @@ export default function PortfolioPage() {
                         </div>
                         <div className="mono text-sm text-right self-center">
                             {p.current_value ? fmtMoney(p.current_value) : "—"}
+                        </div>
+                        <div className="self-center text-right">
+                            {p.pnl !== null ? (
+                                <>
+                                    <div className={`mono text-sm ${p.pnl >= 0 ? "text-positive" : "text-negative"}`}>
+                                        {p.pnl >= 0 ? "+" : ""}{fmtMoney(p.pnl)}
+                                    </div>
+                                    <div className={`mono text-[11px] ${p.pnl >= 0 ? "text-positive/70" : "text-negative/70"}`}>
+                                        {p.pnl_pct !== null ? `${p.pnl_pct >= 0 ? "+" : ""}${p.pnl_pct.toFixed(2)}%` : ""}
+                                    </div>
+                                </>
+                            ) : (
+                                <span className="text-muted-foreground">—</span>
+                            )}
                         </div>
                     </Link>
                 ))}

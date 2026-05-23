@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -6,7 +8,7 @@ from datetime import datetime
 from app.core.dependencies import get_current_user
 from app.core.exceptions import TickerNotFoundError, InsufficientSharesError
 from app.db.session import get_db
-from app.models.models import User, Position
+from app.models.models import User, Position, StockPrice
 from app.services.portfolio_service import PortfolioService
 
 router = APIRouter()
@@ -30,8 +32,12 @@ class PositionResponse(BaseModel):
     ticker: str
     quantity: float
     avg_price: float
+    current_price: Optional[float] = None
+    current_value: Optional[float] = None
+    price_updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
+
 
 @router.post("/buy", response_model=OperationResponse, status_code=status.HTTP_201_CREATED)
 def buy(
@@ -53,8 +59,7 @@ def get_portfolio(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
 ):
-    positions = db.query(Position).filter(Position.user_id == current_user.id).all()
-    return positions
+    return PortfolioService(db).get_portfolio(user_id=current_user.id)
 
 class SellRequest(BaseModel):
     ticker: str

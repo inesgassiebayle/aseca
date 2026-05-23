@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {BuyDialog} from "@/components/ui/buy-dialog";
+import { BuyDialog } from "@/components/ui/buy-dialog";
 
 type Position = {
     id: number;
     ticker: string;
     quantity: number;
     avg_price: number;
+    current_price: number | null;
+    current_value: number | null;
+    price_updated_at: string | null;
 };
 
 function fmtMoney(n: number) {
@@ -22,7 +25,7 @@ export default function PortfolioPage() {
     async function fetchPortfolio() {
         try {
             const token = localStorage.getItem("access_token");
-            const res = await fetch("/api/v1/portfolio", {
+            const res = await fetch("/api/v1/portfolio/", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) throw new Error();
@@ -36,6 +39,13 @@ export default function PortfolioPage() {
     useEffect(() => {
         fetchPortfolio();
     }, []);
+
+    const totalValue = positions.reduce((s, p) => s + (p.current_value ?? 0), 0);
+    const lastUpdate = positions
+        .map((p) => p.price_updated_at)
+        .filter(Boolean)
+        .sort()
+        .at(-1);
 
     return (
         <main className="min-h-screen p-6 md:p-12 space-y-8">
@@ -52,15 +62,27 @@ export default function PortfolioPage() {
                 </button>
             </header>
 
-            {error && (
-                <p className="text-[13px] text-negative">{error}</p>
+            {/* Total value */}
+            {positions.length > 0 && (
+                <section className="card-modern p-8">
+                    <div className="chip mb-3">Total portfolio value</div>
+                    <div className="display text-5xl md:text-6xl grad-text">{fmtMoney(totalValue)}</div>
+                    {lastUpdate && (
+                        <p className="mono text-[11px] text-muted-foreground mt-3">
+                            Prices updated {new Date(lastUpdate).toLocaleString()}
+                        </p>
+                    )}
+                </section>
             )}
 
+            {error && <p className="text-[13px] text-negative">{error}</p>}
+
             <div className="card-modern overflow-hidden">
-                <div className="hidden md:grid grid-cols-[1.5fr_1fr_1fr] gap-4 px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-hairline">
+                <div className="hidden md:grid grid-cols-[1.5fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-hairline">
                     <span>Asset</span>
-                    <span className="text-right">Quantity</span>
+                    <span className="text-right">Qty</span>
                     <span className="text-right">Avg cost</span>
+                    <span className="text-right">Value</span>
                 </div>
 
                 {positions.length === 0 && (
@@ -72,7 +94,7 @@ export default function PortfolioPage() {
                 {positions.map((p) => (
                     <div
                         key={p.id}
-                        className="grid md:grid-cols-[1.5fr_1fr_1fr] grid-cols-[1fr_1fr] gap-3 px-5 py-4 border-b border-hairline last:border-0 hover:bg-surface-elevated/60 transition-colors"
+                        className="grid md:grid-cols-[1.5fr_0.8fr_0.8fr_1fr] grid-cols-[1fr_1fr] gap-3 px-5 py-4 border-b border-hairline last:border-0 hover:bg-surface-elevated/60 transition-colors"
                     >
                         <div className="flex items-center gap-3">
                             <div className="size-9 rounded-xl bg-surface-elevated border border-hairline flex items-center justify-center mono text-[11px] shrink-0">
@@ -83,6 +105,9 @@ export default function PortfolioPage() {
                         <div className="mono text-sm text-right self-center">{p.quantity}</div>
                         <div className="mono text-sm text-right self-center text-muted-foreground">
                             {fmtMoney(p.avg_price)}
+                        </div>
+                        <div className="mono text-sm text-right self-center">
+                            {p.current_value ? fmtMoney(p.current_value) : "—"}
                         </div>
                     </div>
                 ))}

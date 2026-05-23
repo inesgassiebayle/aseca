@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
@@ -80,3 +82,26 @@ class PortfolioService:
         self.db.commit()
         self.db.refresh(operation)
         return operation
+
+    def get_portfolio(self, user_id: int) -> list[dict]:
+        positions = self.db.query(Position).filter(Position.user_id == user_id).all()
+        result = []
+        for p in positions:
+            price_row = self.db.query(StockPrice).filter(StockPrice.ticker == p.ticker).first()
+            current_price = price_row.price if price_row else None
+            result.append({
+                "id": p.id,
+                "ticker": p.ticker,
+                "quantity": p.quantity,
+                "avg_price": p.avg_price,
+                "current_price": current_price,
+                "current_value": current_price * p.quantity if current_price else None,
+                "price_updated_at": price_row.updated_at if price_row else None,
+            })
+        return result
+
+    def get_operations(self, user_id: int, ticker: str | None = None) -> list[Operation]:
+        query = self.db.query(Operation).filter(Operation.user_id == user_id)
+        if ticker:
+            query = query.filter(Operation.ticker == ticker.upper())
+        return query.order_by(Operation.executed_at.desc()).all()

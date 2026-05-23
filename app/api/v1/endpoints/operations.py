@@ -20,14 +20,12 @@ class OperationResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+from app.services.portfolio_service import PortfolioService
+
 @router.get("/", response_model=list[OperationResponse])
 def get_operations(
         ticker: Optional[str] = Query(None),
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
 ):
-    query = db.query(Operation).filter(Operation.user_id == current_user.id)
-    if ticker:
-        query = query.filter(Operation.ticker == ticker.upper())
-    operations = query.order_by(Operation.executed_at.desc()).all()
-    return operations
+    return PortfolioService(db).get_operations(user_id=current_user.id, ticker=ticker)

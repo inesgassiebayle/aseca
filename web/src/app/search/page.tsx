@@ -34,14 +34,6 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="border-b border-hairline px-6 py-4 flex items-center gap-3">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="size-7 rounded-lg ring-grad flex items-center justify-center">
-            <div className="size-3 rounded-sm bg-background" />
-          </div>
-          <span className="text-[15px] font-semibold tracking-tight">StockWatch</span>
-        </Link>
-      </nav>
 
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8">
         <header>

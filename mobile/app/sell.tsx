@@ -6,38 +6,39 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_BASE = "http://10.0.2.2:8000";
 
-export default function LoginScreen() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+export default function SellScreen() {
+    const { ticker } = useLocalSearchParams<{ ticker: string }>();
+    const [quantity, setQuantity] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     async function handleSubmit() {
         setError(null);
+        if (!quantity || Number(quantity) <= 0) {
+            setError("Ingresá una cantidad válida.");
+            return;
+        }
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
+            const token = await AsyncStorage.getItem("access_token");
+            const res = await fetch(`${API_BASE}/api/v1/portfolio/sell`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ ticker, quantity: Number(quantity) }),
             });
-
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}));
-                setError(data.detail ?? "Invalid credentials");
+                setError(data.detail ?? "No se pudo registrar la venta.");
                 return;
             }
-
-            const data = await res.json();
-            await AsyncStorage.setItem("access_token", data.access_token);
-            router.replace("/portfolio");
+            router.back();
         } catch {
-            setError("Network error, please try again");
+            setError("Error de red.");
         } finally {
             setLoading(false);
         }
@@ -45,40 +46,30 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title} testID="title">Sign in</Text>
+            <Text style={styles.title} testID="title">Vender {ticker}</Text>
 
             <TextInput
                 style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                testID="email"
-            />
-
-            <TextInput
-                style={styles.input}
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                testID="password"
+                placeholder="Cantidad"
+                value={quantity}
+                onChangeText={setQuantity}
+                keyboardType="numeric"
+                testID="quantity-input"
             />
 
             {error && <Text style={styles.error} testID="error">{error}</Text>}
 
             <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
+                style={[styles.button, styles.buttonSell, loading && styles.buttonDisabled]}
                 onPress={handleSubmit}
                 disabled={loading}
                 testID="submit"
             >
-                <Text style={styles.buttonText}>{loading ? "Signing in…" : "Sign in"}</Text>
+                <Text style={styles.buttonText}>{loading ? "Procesando…" : "Confirmar venta"}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => router.push("/register")} testID="go-to-register">
-                <Text style={styles.link}>No account? Register</Text>
+            <TouchableOpacity onPress={() => router.back()} testID="cancel">
+                <Text style={styles.link}>Cancelar</Text>
             </TouchableOpacity>
         </View>
     );
@@ -86,10 +77,11 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 24, backgroundColor: "#fff" },
-    title: { fontSize: 28, fontWeight: "bold", marginBottom: 32 },
+    title: { fontSize: 24, fontWeight: "bold", marginBottom: 32 },
     input: { width: "100%", borderWidth: 1, borderColor: "#ccc", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16, marginBottom: 16 },
     error: { color: "#e00", marginBottom: 12, textAlign: "center" },
     button: { width: "100%", backgroundColor: "#000", paddingVertical: 14, borderRadius: 8, alignItems: "center", marginBottom: 16 },
+    buttonSell: { backgroundColor: "#ef4444" },
     buttonDisabled: { opacity: 0.5 },
     buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
     link: { color: "#555", fontSize: 14 },

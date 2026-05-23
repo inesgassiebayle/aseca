@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@aseca/shared": "*",
+    "@react-native-async-storage/async-storage": "^3.1.0",
     "@react-navigation/native": "^7.0.14",
     "expo": "~52.0.0",
     "expo-asset": "~11.0.5",

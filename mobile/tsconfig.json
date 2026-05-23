@@ -5,5 +5,8 @@
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
+  },
+  "files": [],
+  "include": ["app/**/*", "components/**/*"],
+  "exclude": ["tests/**/*"]
 }

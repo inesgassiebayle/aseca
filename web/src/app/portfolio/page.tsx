@@ -44,6 +44,10 @@ export default function PortfolioPage() {
     }, []);
 
     const totalValue = positions.reduce((s, p) => s + (p.current_value ?? 0), 0);
+    const totalCost = positions.reduce((s, p) => s + p.avg_price * p.quantity, 0);
+    const totalPnl = positions.reduce((s, p) => s + (p.pnl ?? 0), 0);
+    const excludedTickers = positions.filter((p) => p.current_price === null).map((p) => p.ticker);
+
     const lastUpdate = positions
         .map((p) => p.price_updated_at)
         .filter(Boolean)
@@ -65,14 +69,57 @@ export default function PortfolioPage() {
                 </button>
             </header>
 
-            {/* Total value */}
             {positions.length > 0 && (
-                <section className="card-modern p-8">
-                    <div className="chip mb-3">Total portfolio value</div>
-                    <div className="display text-5xl md:text-6xl grad-text">{fmtMoney(totalValue)}</div>
-                    {lastUpdate && (
-                        <p className="mono text-[11px] text-muted-foreground mt-3">
-                            Prices updated {new Date(lastUpdate).toLocaleString()}
+                <section className="card-modern p-8 md:p-10">
+                    <div className="grid md:grid-cols-[1.4fr_1fr] gap-8 md:items-end">
+                        <div>
+                            <div className="chip mb-5 flex items-center gap-1.5">
+                                <span className="size-1.5 rounded-full bg-primary" />
+                                Total portfolio value
+                            </div>
+                            <div className="display text-6xl md:text-7xl grad-text leading-[0.95]">
+                                {fmtMoney(totalValue)}
+                            </div>
+                            <div className="flex items-center gap-3 mt-5">
+                    <span className={`mono text-sm px-2.5 py-1 rounded-md ${
+                        totalPnl >= 0 ? "bg-positive/10 text-positive" : "bg-negative/10 text-negative"
+                    }`}>
+                        {totalPnl >= 0 ? "↑" : "↓"} {fmtMoney(Math.abs(totalPnl))}
+                    </span>
+                                <span className={`mono text-sm ${totalPnl >= 0 ? "text-positive" : "text-negative"}`}>
+                        {totalCost > 0 ? `${((totalPnl / totalCost) * 100).toFixed(2)}%` : "0.00%"} all-time
+                    </span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="rounded-2xl border border-hairline bg-surface/60 p-4 flex flex-col justify-between min-h-[88px]">
+                                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Cost basis</span>
+                                <span className="mono text-xs mt-2">{fmtMoney(totalCost)}</span>
+                            </div>
+                            <div className="rounded-2xl border border-hairline bg-surface/60 p-4 flex flex-col justify-between min-h-[88px]">
+                                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Positions</span>
+                                <span className="text-base font-medium mt-2">{positions.length}</span>
+                            </div>
+                            <div className="rounded-2xl border border-hairline bg-surface/60 p-4 flex flex-col justify-between min-h-[88px]">
+                                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Updated</span>
+                                <span className="mono text-xs mt-2">
+                        {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : "—"}
+                    </span>
+                            </div>
+                            <button
+                                onClick={() => setBuyOpen(true)}
+                                className="rounded-2xl bg-primary text-primary-foreground p-4 flex flex-col justify-between hover:opacity-90 transition-opacity glow-primary min-h-[88px] text-left"
+                            >
+                                <span className="text-[11px] uppercase tracking-wider opacity-70">Trade</span>
+                                <span className="text-base font-medium mt-2">+ New position</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {excludedTickers.length > 0 && (
+                        <p className="text-[12px] text-negative/80 mt-4">
+                            ⚠ Sin precio disponible: {excludedTickers.join(", ")} — excluidos del cálculo
                         </p>
                     )}
                 </section>

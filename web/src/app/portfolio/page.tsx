@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { BuyDialog } from "@/components/ui/buy-dialog";
+import Link from "next/link";
 
 type Position = {
     id: number;
@@ -92,8 +93,9 @@ export default function PortfolioPage() {
                 )}
 
                 {positions.map((p) => (
-                    <div
+                    <Link
                         key={p.id}
+                        href={`/portfolio/${p.ticker}`}
                         className="grid md:grid-cols-[1.5fr_0.8fr_0.8fr_1fr] grid-cols-[1fr_1fr] gap-3 px-5 py-4 border-b border-hairline last:border-0 hover:bg-surface-elevated/60 transition-colors"
                     >
                         <div className="flex items-center gap-3">
@@ -109,7 +111,7 @@ export default function PortfolioPage() {
                         <div className="mono text-sm text-right self-center">
                             {p.current_value ? fmtMoney(p.current_value) : "—"}
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
 

@@ -17,3 +17,6 @@ class TickerNotFoundError(Exception):
 
 class InsufficientSharesError(Exception):
     pass
+
+class PositionNotFoundError(Exception):
+    pass

@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.models.models import Operation, Position, StockPrice
-from app.core.exceptions import TickerNotFoundError, InsufficientSharesError
+from app.core.exceptions import TickerNotFoundError, InsufficientSharesError, PositionNotFoundError
 
 
 class PortfolioService:
@@ -105,3 +105,31 @@ class PortfolioService:
         if ticker:
             query = query.filter(Operation.ticker == ticker.upper())
         return query.order_by(Operation.executed_at.desc()).all()
+
+    def get_position_detail(self, user_id: int, ticker: str) -> dict:
+        position = self.db.query(Position).filter(
+            Position.user_id == user_id,
+            Position.ticker == ticker.upper(),
+            ).first()
+
+        if not position:
+            raise PositionNotFoundError(f"No tenés posición en {ticker}")
+
+        price_row = self.db.query(StockPrice).filter(StockPrice.ticker == ticker.upper()).first()
+        current_price = price_row.price if price_row else None
+
+        pnl = (current_price - position.avg_price) * position.quantity if current_price else None
+
+        operations = self.db.query(Operation).filter(
+            Operation.user_id == user_id,
+            Operation.ticker == ticker.upper(),
+            ).order_by(Operation.executed_at.desc()).all()
+
+        return {
+            "ticker": position.ticker,
+            "quantity": position.quantity,
+            "avg_price": position.avg_price,
+            "current_price": current_price,
+            "pnl": pnl,
+            "operations": operations,
+        }

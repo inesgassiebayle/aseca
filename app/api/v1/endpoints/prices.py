@@ -23,6 +23,11 @@ class LastUpdateResponse(BaseModel):
     last_update: datetime | None
 
 
+class TickerPriceResponse(BaseModel):
+    ticker: str
+    price: float | None
+
+
 def get_price_service(db: Session = Depends(get_db)) -> PriceService:
     return PriceService(db, YahooFinanceClient(), TICKER_WHITELIST)
 
@@ -36,3 +41,8 @@ def run_batch(service: PriceService = Depends(get_price_service)):
 @router.get("/last-update", response_model=LastUpdateResponse)
 def last_update(service: PriceService = Depends(get_price_service)):
     return LastUpdateResponse(last_update=service.get_last_update())
+
+
+@router.get("/{ticker}", response_model=TickerPriceResponse)
+def get_ticker_price(ticker: str, service: PriceService = Depends(get_price_service)):
+    return TickerPriceResponse(ticker=ticker.upper(), price=service.get_price(ticker.upper()))

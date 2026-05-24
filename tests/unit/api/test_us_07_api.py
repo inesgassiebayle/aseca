@@ -63,6 +63,37 @@ class TestBatchEndpoint:
         assert body["failed"] == 0
 
 
+class TestGetTickerPriceEndpoint:
+    def test_retorna_precio_si_existe(self, prices_client):
+        c, mock_service = prices_client
+        mock_service.get_price.return_value = 175.5
+
+        response = c.get("/api/v1/prices/AAPL")
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["ticker"] == "AAPL"
+        assert body["price"] == 175.5
+
+    def test_retorna_precio_null_si_no_existe(self, prices_client):
+        c, mock_service = prices_client
+        mock_service.get_price.return_value = None
+
+        response = c.get("/api/v1/prices/XYZ")
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["price"] is None
+
+    def test_llama_al_service_con_ticker(self, prices_client):
+        c, mock_service = prices_client
+        mock_service.get_price.return_value = 100.0
+
+        c.get("/api/v1/prices/MSFT")
+
+        mock_service.get_price.assert_called_once_with("MSFT")
+
+
 class TestLastUpdateEndpoint:
     def test_get_last_update_retorna_200(self, prices_client):
         c, mock_service = prices_client

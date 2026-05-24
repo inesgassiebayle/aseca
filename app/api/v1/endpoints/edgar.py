@@ -8,16 +8,17 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.integrations.edgar import XbrlClient
-from app.services.edgar_service import CompanyDetailService, EdgarService, TtlCache
+from app.services.edgar_service import CompanyDetailService, EdgarService, TtlCache, TtlKeyedCache
 
 router = APIRouter()
 
 _edgar_cache = TtlCache()
+_filings_cache = TtlKeyedCache()
 
 
 def get_edgar_service():
     with httpx.Client() as client:
-        yield EdgarService(client, cache=_edgar_cache)
+        yield EdgarService(client, cache=_edgar_cache, filings_cache=_filings_cache)
 
 
 def get_company_detail_service(db: Session = Depends(get_db)) -> CompanyDetailService:
@@ -28,6 +29,17 @@ class CompanyResult(BaseModel):
     name: str
     ticker: str
     cik: int
+
+
+class Filing(BaseModel):
+    type: str
+    date: str
+    url: str
+
+
+class FilingsResponse(BaseModel):
+    filings: list[Filing]
+    message: str | None = None
 
 
 class FinancialMetricOut(BaseModel):
@@ -90,3 +102,10 @@ def get_company_financials(
             out.total_liabilities = FinancialMetricOut(**vars(f.total_liabilities))
 
     return out
+
+
+@router.get("/companies/{cik}/filings", response_model=FilingsResponse)
+def get_filings(cik: int, service: EdgarService = Depends(get_edgar_service)):
+    filings = service.get_filings(cik)
+    message = "Esta empresa no tiene filings 10-K o 10-Q disponibles." if not filings else None
+    return FilingsResponse(filings=filings, message=message)

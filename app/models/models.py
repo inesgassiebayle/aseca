@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Index
 from sqlalchemy.orm import relationship
 from app.db.session import Base
 
@@ -49,3 +49,20 @@ class WatchlistItem(Base):
     ticker = Column(String, nullable=False)
 
     owner = relationship("User", back_populates="watchlist")
+
+
+class StockPrice(Base):
+    __tablename__ = "stock_prices"
+
+    id = Column(Integer, primary_key=True)
+    ticker = Column(String, nullable=False, unique=True, index=True)
+    price = Column(Float, nullable=False)
+
+
+class BatchRun(Base):
+    __tablename__ = "batch_runs"
+
+    id = Column(Integer, primary_key=True)
+    ran_at = Column(DateTime, nullable=False)
+    updated_count = Column(Integer, nullable=False)
+    failed_count = Column(Integer, nullable=False)

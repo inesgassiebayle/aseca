@@ -1,3 +1,6 @@
+# Database
+*.db
+
 # Python
 __pycache__/
 *.py[cod]
@@ -42,5 +45,6 @@ postgres_data/
 node_modules
 **/node_modules
 .next
+web/.next
 dist
 coverage

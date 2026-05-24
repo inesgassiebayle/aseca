@@ -141,6 +141,10 @@ describe("US-04 — Company financial detail", () => {
       statusCode: 200,
       body: [APPLE_COMPANY],
     }).as("search");
+    cy.intercept("GET", "/api/v1/edgar/search?q=AAPL", {
+      statusCode: 200,
+      body: [APPLE_COMPANY],
+    }).as("searchCompany");
     interceptPriceDetail();
 
     cy.visit("/search");
@@ -149,6 +153,7 @@ describe("US-04 — Company financial detail", () => {
     cy.contains("AAPL").click();
 
     cy.url().should("include", "/company/AAPL");
+    cy.wait("@searchCompany");
     cy.contains(APPLE_COMPANY.name).should("be.visible");
   });
 });

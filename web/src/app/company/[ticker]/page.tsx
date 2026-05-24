@@ -9,6 +9,42 @@ import { LastUpdateBadge } from "@/components/LastUpdateBadge";
 type Company = { name: string; ticker: string; cik: number };
 type Filing = { type: string; date: string; url: string };
 type FilingsResponse = { filings: Filing[]; message: string | null };
+type Metric = { concept: string; value: number; unit: string; period: string };
+type CompanyDetail = {
+  financials_available: boolean;
+  from_cache: boolean;
+  revenue: Metric | null;
+  net_income: Metric | null;
+  eps: Metric | null;
+  total_assets: Metric | null;
+  total_liabilities: Metric | null;
+};
+
+function formatValue(value: number, unit: string): string {
+  if (unit === "USD") {
+    if (Math.abs(value) >= 1e12) return "$" + (value / 1e12).toFixed(2) + "T";
+    if (Math.abs(value) >= 1e9) return "$" + (value / 1e9).toFixed(2) + "B";
+    if (Math.abs(value) >= 1e6) return "$" + (value / 1e6).toFixed(2) + "M";
+    return "$" + value.toFixed(2);
+  }
+  return value.toFixed(2);
+}
+
+function MetricRow({ label, metric }: { label: string; metric: Metric | null }) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-hairline last:border-0">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      {metric ? (
+        <div className="text-right">
+          <span className="mono text-sm font-medium">{formatValue(metric.value, metric.unit)}</span>
+          <span className="text-[11px] text-muted-foreground/60 ml-2">{metric.period}</span>
+        </div>
+      ) : (
+        <span className="text-xs text-muted-foreground/50 italic">—</span>
+      )}
+    </div>
+  );
+}
 
 export default function CompanyPage({ params }: { params: Promise<{ ticker: string }> }) {
   const router = useRouter();
@@ -17,9 +53,11 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
   const [price, setPrice] = useState<number | null | undefined>(undefined);
   const [filings, setFilings] = useState<Filing[]>([]);
   const [filingsMessage, setFilingsMessage] = useState<string | null>(null);
-  const [tab, setTab] = useState<"overview" | "filings">("overview");
+  const [tab, setTab] = useState<"overview" | "financials" | "filings">("overview");
   const [loadingCompany, setLoadingCompany] = useState(true);
   const [loadingFilings, setLoadingFilings] = useState(false);
+  const [financials, setFinancials] = useState<CompanyDetail | null>(null);
+  const [loadingFinancials, setLoadingFinancials] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
@@ -43,6 +81,16 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
       .catch(() => setNotFound(true))
       .finally(() => setLoadingCompany(false));
   }, [ticker]);
+
+  useEffect(() => {
+    if (!company || tab !== "financials") return;
+    if (financials) return;
+    setLoadingFinancials(true);
+    fetch("/api/v1/edgar/company/" + company.cik + "/financials?ticker=" + company.ticker)
+      .then((r) => r.json())
+      .then(setFinancials)
+      .finally(() => setLoadingFinancials(false));
+  }, [company, tab]);
 
   useEffect(() => {
     if (!company || tab !== "filings") return;
@@ -115,7 +163,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
         </section>
 
         <nav className="inline-flex gap-1 p-1 rounded-full border border-hairline bg-surface/60">
-          {(["overview", "filings"] as const).map((t) => (
+          {(["overview", "financials", "filings"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -142,6 +190,28 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Company name</p>
               <p className="mono text-lg mt-2">{company.name}</p>
             </div>
+          </section>
+        )}
+
+        {tab === "financials" && (
+          <section className="card-modern p-5">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Financial Data · SEC EDGAR</span>
+              {financials?.from_cache && <span className="chip">cached</span>}
+            </div>
+            {loadingFinancials && <div className="flex justify-center py-8"><Loader2 className="size-5 animate-spin text-muted-foreground" /></div>}
+            {!loadingFinancials && financials && !financials.financials_available && (
+              <p className="text-sm text-muted-foreground italic py-4 text-center">No XBRL financial data available for this company</p>
+            )}
+            {!loadingFinancials && financials?.financials_available && (
+              <div>
+                <MetricRow label="Revenue" metric={financials.revenue} />
+                <MetricRow label="Net Income" metric={financials.net_income} />
+                <MetricRow label="EPS (basic)" metric={financials.eps} />
+                <MetricRow label="Total Assets" metric={financials.total_assets} />
+                <MetricRow label="Total Liabilities" metric={financials.total_liabilities} />
+              </div>
+            )}
           </section>
         )}
 

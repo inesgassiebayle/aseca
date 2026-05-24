@@ -1,16 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader2, ExternalLink } from "lucide-react";
+import { LastUpdateBadge } from "@/components/LastUpdateBadge";
 
 type Company = { name: string; ticker: string; cik: number };
 type Filing = { type: string; date: string; url: string };
 type FilingsResponse = { filings: Filing[]; message: string | null };
 
 export default function CompanyPage({ params }: { params: Promise<{ ticker: string }> }) {
+  const router = useRouter();
   const [ticker, setTicker] = useState("");
   const [company, setCompany] = useState<Company | null>(null);
+  const [price, setPrice] = useState<number | null | undefined>(undefined);
   const [filings, setFilings] = useState<Filing[]>([]);
   const [filingsMessage, setFilingsMessage] = useState<string | null>(null);
   const [tab, setTab] = useState<"overview" | "filings">("overview");
@@ -31,6 +35,10 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
         const match = data.find((c) => c.ticker.toUpperCase() === ticker);
         if (!match) { setNotFound(true); return; }
         setCompany(match);
+        fetch(`/api/v1/prices/${ticker}`)
+          .then((r) => r.json())
+          .then((d) => setPrice(d.price ?? null))
+          .catch(() => setPrice(null));
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoadingCompany(false));
@@ -68,27 +76,39 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="border-b border-hairline px-6 py-4 flex items-center gap-3">
+      <nav className="border-b border-hairline px-6 py-4 flex items-center justify-between gap-3">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="size-7 rounded-lg ring-grad flex items-center justify-center">
             <div className="size-3 rounded-sm bg-background" />
           </div>
           <span className="text-[15px] font-semibold tracking-tight">StockWatch</span>
         </Link>
+        <LastUpdateBadge />
       </nav>
 
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8">
-        <Link href="/search" className="chip hover:text-foreground transition-colors w-fit">
+        <button onClick={() => router.back()} className="chip hover:text-foreground transition-colors w-fit">
           ← Back
-        </Link>
+        </button>
 
         <section className="card-modern p-8 noise">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="size-12 rounded-2xl bg-surface-elevated border border-hairline flex items-center justify-center mono text-sm shrink-0">
-              {company.ticker.slice(0, 2)}
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex items-center gap-4">
+              <div className="size-12 rounded-2xl bg-surface-elevated border border-hairline flex items-center justify-center mono text-sm shrink-0">
+                {company.ticker.slice(0, 2)}
+              </div>
+              <div>
+                <div className="mono text-xs text-muted-foreground">{company.ticker} · CIK {company.cik}</div>
+              </div>
             </div>
-            <div>
-              <div className="mono text-xs text-muted-foreground">{company.ticker} · CIK {company.cik}</div>
+            <div className="text-right shrink-0">
+              {price === undefined && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+              {price !== undefined && price !== null && (
+                <span className="mono text-2xl">${price.toFixed(2)}</span>
+              )}
+              {price === null && (
+                <span className="text-xs text-muted-foreground/60">Price not available</span>
+              )}
             </div>
           </div>
           <h1 className="display text-4xl md:text-5xl grad-text leading-tight">{company.name}</h1>

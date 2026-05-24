@@ -25,6 +25,13 @@ function interceptCompany() {
   }).as("searchCompany");
 }
 
+function interceptPrice(price: number | null) {
+  cy.intercept("GET", `/api/v1/prices/${COMPANY.ticker}`, {
+    statusCode: 200,
+    body: { ticker: COMPANY.ticker, price },
+  }).as("getPrice");
+}
+
 function interceptFilings() {
   cy.intercept("GET", `/api/v1/edgar/companies/${COMPANY.cik}/filings`, {
     statusCode: 200,
@@ -35,6 +42,7 @@ function interceptFilings() {
 describe("Company page", () => {
   beforeEach(() => {
     interceptCompany();
+    interceptPrice(175.5);
     cy.visit(`/company/${COMPANY.ticker}`);
     cy.wait("@searchCompany");
   });
@@ -56,8 +64,8 @@ describe("Company page", () => {
     cy.contains("button", "filings").should("be.visible");
   });
 
-  it("tiene un link de vuelta a search", () => {
-    cy.contains("← Back").should("be.visible").and("have.attr", "href", "/search");
+  it("tiene un botón de vuelta", () => {
+    cy.contains("← Back").should("be.visible");
   });
 
   it("muestra el logo StockWatch con link a home", () => {
@@ -65,9 +73,61 @@ describe("Company page", () => {
   });
 });
 
+describe("Company page — precio", () => {
+  it("muestra el precio cuando está disponible", () => {
+    interceptCompany();
+    interceptPrice(213.50);
+    cy.visit(`/company/${COMPANY.ticker}`);
+    cy.wait("@searchCompany");
+    cy.wait("@getPrice");
+
+    cy.contains("$213.50").should("be.visible");
+  });
+
+  it("muestra Precio no disponible cuando el ticker no tiene precio", () => {
+    interceptCompany();
+    interceptPrice(null);
+    cy.visit(`/company/${COMPANY.ticker}`);
+    cy.wait("@searchCompany");
+    cy.wait("@getPrice");
+
+    cy.contains("Price not available").should("be.visible");
+  });
+
+  it("llama al endpoint de precio con el ticker correcto", () => {
+    interceptCompany();
+    interceptPrice(175.5);
+    cy.visit(`/company/${COMPANY.ticker}`);
+    cy.wait("@searchCompany");
+    cy.wait("@getPrice").its("request.url").should("include", COMPANY.ticker);
+  });
+
+  it("el precio aparece en el header de la card", () => {
+    interceptCompany();
+    interceptPrice(150.0);
+    cy.visit(`/company/${COMPANY.ticker}`);
+    cy.wait("@searchCompany");
+    cy.wait("@getPrice");
+
+    cy.contains("$150.00").should("be.visible");
+    cy.contains(COMPANY.name).should("be.visible");
+  });
+
+  it("el precio se muestra con dos decimales", () => {
+    interceptCompany();
+    interceptPrice(213.5);
+    cy.visit(`/company/${COMPANY.ticker}`);
+    cy.wait("@searchCompany");
+    cy.wait("@getPrice");
+
+    cy.contains("$213.50").should("be.visible");
+  });
+});
+
 describe("Company page — tab Overview", () => {
   beforeEach(() => {
     interceptCompany();
+    interceptPrice(175.5);
     cy.visit(`/company/${COMPANY.ticker}`);
     cy.wait("@searchCompany");
   });
@@ -88,6 +148,7 @@ describe("Company page — tab Overview", () => {
 describe("Company page — tab Filings", () => {
   beforeEach(() => {
     interceptCompany();
+    interceptPrice(175.5);
     interceptFilings();
     cy.visit(`/company/${COMPANY.ticker}`);
     cy.wait("@searchCompany");
@@ -135,6 +196,7 @@ describe("Company page — tab Filings", () => {
 describe("Company page — sin filings", () => {
   it("muestra mensaje informativo cuando no hay 10-K ni 10-Q", () => {
     interceptCompany();
+    interceptPrice(null);
     cy.intercept("GET", `/api/v1/edgar/companies/${COMPANY.cik}/filings`, {
       statusCode: 200,
       body: { filings: [], message: "Esta empresa no tiene filings 10-K o 10-Q disponibles." },

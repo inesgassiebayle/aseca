@@ -79,7 +79,7 @@ export default function SearchPage() {
             {results.map((c) => (
               <Link
                 key={c.cik}
-                href={`/company/${c.ticker}`}
+                href={`/company/${c.cik}?ticker=${c.ticker}`}
                 className="card-modern p-4 hover:bg-surface-elevated transition-colors block"
               >
                 <div className="flex items-center gap-3">

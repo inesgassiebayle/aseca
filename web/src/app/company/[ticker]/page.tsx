@@ -5,6 +5,16 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader2, ExternalLink } from "lucide-react";
 import { LastUpdateBadge } from "@/components/LastUpdateBadge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Company = { name: string; ticker: string; cik: number };
 type Filing = { type: string; date: string; url: string };
@@ -91,7 +101,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
           ← Back
         </button>
 
-        <section className="card-modern p-8 noise">
+        <section className="card-modern p-8 noise relative">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex items-center gap-4">
               <div className="size-12 rounded-2xl bg-surface-elevated border border-hairline flex items-center justify-center mono text-sm shrink-0">
@@ -102,7 +112,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
               </div>
             </div>
             <div className="text-right shrink-0">
-              {price === undefined && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+              {price === undefined && <Skeleton className="h-7 w-20" />}
               {price !== undefined && price !== null && (
                 <span className="mono text-2xl">${price.toFixed(2)}</span>
               )}
@@ -114,42 +124,50 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
           <h1 className="display text-4xl md:text-5xl grad-text leading-tight">{company.name}</h1>
         </section>
 
-        <nav className="inline-flex gap-1 p-1 rounded-full border border-hairline bg-surface/60">
-          {(["overview", "filings"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-4 py-1.5 text-[13px] rounded-full capitalize transition-colors ${
-                tab === t ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </nav>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as "overview" | "filings")}>
+          <TabsList>
+            <TabsTrigger value="overview">overview</TabsTrigger>
+            <TabsTrigger value="filings">filings</TabsTrigger>
+          </TabsList>
 
-        {tab === "overview" && (
-          <section className="grid grid-cols-2 gap-3">
-            <div className="card-modern p-5">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Ticker</p>
-              <p className="mono text-2xl mt-2">{company.ticker}</p>
+          <TabsContent value="overview" className="mt-6">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="card-modern p-5">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Ticker</p>
+                <p className="mono text-2xl mt-2">{company.ticker}</p>
+              </div>
+              <div className="card-modern p-5">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">CIK</p>
+                <p className="mono text-2xl mt-2">{company.cik}</p>
+              </div>
+              <div className="card-modern p-5 col-span-2">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Company name</p>
+                <p className="mono text-lg mt-2">{company.name}</p>
+              </div>
             </div>
-            <div className="card-modern p-5">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">CIK</p>
-              <p className="mono text-2xl mt-2">{company.cik}</p>
-            </div>
-            <div className="card-modern p-5 col-span-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Company name</p>
-              <p className="mono text-lg mt-2">{company.name}</p>
-            </div>
-          </section>
-        )}
+          </TabsContent>
 
-        {tab === "filings" && (
-          <section className="space-y-3">
+          <TabsContent value="filings" className="mt-6">
             {loadingFilings && (
-              <div className="flex justify-center py-12">
-                <Loader2 className="size-5 animate-spin text-muted-foreground" />
+              <div className="card-modern overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...Array(4)].map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell />
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
 
@@ -159,24 +177,44 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
               </div>
             )}
 
-            {!loadingFilings && filings.map((f, i) => (
-              <a
-                key={i}
-                href={f.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="card-modern p-4 flex items-center gap-4 hover:bg-surface-elevated transition-colors"
-              >
-                <span className="mono text-xs bg-primary/15 text-primary px-2.5 py-1 rounded-md shrink-0">
-                  {f.type}
-                </span>
-                <span className="text-sm flex-1">SEC EDGAR submission</span>
-                <span className="mono text-xs text-muted-foreground">{f.date}</span>
-                <ExternalLink className="size-3.5 text-muted-foreground shrink-0" />
-              </a>
-            ))}
-          </section>
-        )}
+            {!loadingFilings && filings.length > 0 && (
+              <div className="card-modern overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Filing</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filings.map((f, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <span className="mono text-xs bg-primary/15 text-primary px-2.5 py-1 rounded-md">
+                            {f.type}
+                          </span>
+                        </TableCell>
+                        <TableCell className="mono text-xs text-muted-foreground">{f.date}</TableCell>
+                        <TableCell className="text-right">
+                          <a
+                            href={f.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            SEC EDGAR submission
+                            <ExternalLink className="size-3" />
+                          </a>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

@@ -57,7 +57,7 @@ describe("Company page", () => {
   });
 
   it("muestra el tab overview activo por defecto", () => {
-    cy.contains("button", "overview").should("have.class", "bg-foreground");
+    cy.contains("button", "overview").should("have.attr", "data-state", "active");
   });
 
   it("muestra el tab filings", () => {

@@ -1,9 +1,13 @@
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Optional
 
 import httpx
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.integrations.edgar import CompanyFinancials, XbrlClient
+from app.models.models import BatchRun, StockPrice
 
 COMPANY_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 SUBMISSIONS_URL     = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
@@ -202,3 +206,43 @@ class EdgarService:
         data = response.json()
         self.cache.set(data)
         return data
+
+
+@dataclass
+class PriceInfo:
+    price: float
+    last_updated: Optional[datetime]
+
+
+@dataclass
+class CompanyDetailResult:
+    cik: str
+    ticker: str
+    price_info: Optional[PriceInfo]
+    financials: Optional[CompanyFinancials]
+
+
+class CompanyDetailService:
+    def __init__(self, db: Session, xbrl_client: XbrlClient):
+        self.db = db
+        self.xbrl_client = xbrl_client
+
+    def get_company_detail(self, cik: str, ticker: str) -> CompanyDetailResult:
+        return CompanyDetailResult(
+            cik=cik,
+            ticker=ticker,
+            price_info=self._get_price_info(ticker),
+            financials=self.xbrl_client.get_company_financials(cik, ticker),
+        )
+
+    def _get_price_info(self, ticker: str) -> Optional[PriceInfo]:
+        if not ticker:
+            return None
+        record = self.db.query(StockPrice).filter(StockPrice.ticker == ticker.upper()).first()
+        if not record:
+            return None
+        batch = self.db.query(BatchRun).order_by(BatchRun.ran_at.desc()).first()
+        return PriceInfo(
+            price=record.price,
+            last_updated=batch.ran_at if batch else None,
+        )

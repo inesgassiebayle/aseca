@@ -16,21 +16,44 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-type Company = { name: string; ticker: string; cik: number };
-type Filing = { type: string; date: string; url: string };
+type Company  = { name: string; ticker: string; cik: number };
+type Filing   = { type: string; date: string; url: string };
 type FilingsResponse = { filings: Filing[]; message: string | null };
+
+type MetricKey = "revenue" | "net_income" | "eps";
+type DataPoint = { period_end: string; value: number; form: string; filed: string };
+type MetricHistory = { cik: number; metric: string; data_points: DataPoint[]; cached: boolean };
+
+const METRICS: { key: MetricKey; label: string }[] = [
+  { key: "revenue",    label: "Revenue"    },
+  { key: "net_income", label: "Net Income" },
+  { key: "eps",        label: "EPS"        },
+];
+
+function formatValue(value: number, metric: MetricKey): string {
+  if (metric === "eps") return `$${value.toFixed(2)}`;
+  const abs = Math.abs(value);
+  if (abs >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+  if (abs >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+  return `$${value.toLocaleString()}`;
+}
 
 export default function CompanyPage({ params }: { params: Promise<{ ticker: string }> }) {
   const router = useRouter();
-  const [ticker, setTicker] = useState("");
-  const [company, setCompany] = useState<Company | null>(null);
-  const [price, setPrice] = useState<number | null | undefined>(undefined);
-  const [filings, setFilings] = useState<Filing[]>([]);
+  const [ticker, setTicker]                 = useState("");
+  const [company, setCompany]               = useState<Company | null>(null);
+  const [price, setPrice]                   = useState<number | null | undefined>(undefined);
+  const [filings, setFilings]               = useState<Filing[]>([]);
   const [filingsMessage, setFilingsMessage] = useState<string | null>(null);
-  const [tab, setTab] = useState<"overview" | "filings">("overview");
+  const [tab, setTab]                       = useState<"overview" | "filings" | "metrics">("overview");
+
+  const [metric, setMetric]                 = useState<MetricKey>("revenue");
+  const [metricData, setMetricData]         = useState<MetricHistory | null>(null);
+  const [loadingMetrics, setLoadingMetrics] = useState(false);
+
   const [loadingCompany, setLoadingCompany] = useState(true);
   const [loadingFilings, setLoadingFilings] = useState(false);
-  const [notFound, setNotFound] = useState(false);
+  const [notFound, setNotFound]             = useState(false);
 
   useEffect(() => {
     params.then(({ ticker }) => setTicker(ticker.toUpperCase()));
@@ -66,6 +89,17 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
       })
       .finally(() => setLoadingFilings(false));
   }, [company, tab]);
+
+  useEffect(() => {
+    if (!company || tab !== "metrics") return;
+    setLoadingMetrics(true);
+    setMetricData(null);
+    fetch(`/api/v1/edgar/companies/${company.cik}/metrics/${metric}`)
+      .then((r) => r.json())
+      .then((data: MetricHistory) => setMetricData(data))
+      .catch(() => setMetricData(null))
+      .finally(() => setLoadingMetrics(false));
+  }, [company, tab, metric]);
 
   if (loadingCompany) {
     return (
@@ -124,10 +158,11 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
           <h1 className="display text-4xl md:text-5xl grad-text leading-tight">{company.name}</h1>
         </section>
 
-        <Tabs value={tab} onValueChange={(v) => setTab(v as "overview" | "filings")}>
+        <Tabs value={tab} onValueChange={(v: string) => setTab(v as "overview" | "filings" | "metrics")}>
           <TabsList>
             <TabsTrigger value="overview">overview</TabsTrigger>
             <TabsTrigger value="filings">filings</TabsTrigger>
+            <TabsTrigger value="metrics">metrics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -212,6 +247,104 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
                   </TableBody>
                 </Table>
               </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="metrics" className="mt-6 space-y-4">
+            <div className="flex gap-2" data-testid="metric-selector">
+              {METRICS.map((m) => (
+                <button
+                  key={m.key}
+                  data-testid={`metric-btn-${m.key}`}
+                  onClick={() => setMetric(m.key)}
+                  className={`chip transition-colors ${
+                    metric === m.key
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:text-foreground"
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+
+            {loadingMetrics && (
+              <div className="card-modern overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Period</TableHead>
+                      <TableHead>Value</TableHead>
+                      <TableHead>Form</TableHead>
+                      <TableHead>Filed</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...Array(4)].map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            {!loadingMetrics && metricData && metricData.data_points.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-sm">
+                  No historical data available for this metric.
+                </p>
+              </div>
+            )}
+
+            {!loadingMetrics && metricData && metricData.data_points.length > 0 && (
+              <>
+                <div className="card-modern overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Period end</TableHead>
+                        <TableHead className="text-right">Value</TableHead>
+                        <TableHead>Form</TableHead>
+                        <TableHead>Filed</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {metricData.data_points.map((dp, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="mono text-xs text-muted-foreground">
+                            {dp.period_end}
+                          </TableCell>
+                          <TableCell className="mono text-sm text-right">
+                            {formatValue(dp.value, metric)}
+                          </TableCell>
+                          <TableCell>
+                            <span className="mono text-xs bg-primary/15 text-primary px-2.5 py-1 rounded-md">
+                              {dp.form}
+                            </span>
+                          </TableCell>
+                          <TableCell className="mono text-xs text-muted-foreground">
+                            {dp.filed}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {metricData.cached && (
+                  <p
+                    className="text-[11px] text-muted-foreground/50 text-right"
+                    data-testid="cached-badge"
+                  >
+                    Cached · refreshes every hour
+                  </p>
+                )}
+              </>
             )}
           </TabsContent>
         </Tabs>

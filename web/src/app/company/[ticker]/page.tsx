@@ -5,10 +5,20 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader2, ExternalLink } from "lucide-react";
 import { LastUpdateBadge } from "@/components/LastUpdateBadge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-type Company = { name: string; ticker: string; cik: number };
-type Filing = { type: string; date: string; url: string };
+type Company        = { name: string; ticker: string; cik: number };
+type Filing         = { type: string; date: string; url: string };
 type FilingsResponse = { filings: Filing[]; message: string | null };
+
 type Metric = { concept: string; value: number; unit: string; period: string };
 type CompanyDetail = {
   financials_available: boolean;
@@ -20,14 +30,32 @@ type CompanyDetail = {
   total_liabilities: Metric | null;
 };
 
-function formatValue(value: number, unit: string): string {
+type MetricKey  = "revenue" | "net_income" | "eps";
+type DataPoint  = { period_end: string; value: number; form: string; filed: string };
+type MetricHistory = { cik: number; metric: string; data_points: DataPoint[]; cached: boolean };
+
+const METRICS: { key: MetricKey; label: string }[] = [
+  { key: "revenue",    label: "Revenue"    },
+  { key: "net_income", label: "Net Income" },
+  { key: "eps",        label: "EPS"        },
+];
+
+function formatFinancialValue(value: number, unit: string): string {
   if (unit === "USD") {
     if (Math.abs(value) >= 1e12) return "$" + (value / 1e12).toFixed(2) + "T";
-    if (Math.abs(value) >= 1e9) return "$" + (value / 1e9).toFixed(2) + "B";
-    if (Math.abs(value) >= 1e6) return "$" + (value / 1e6).toFixed(2) + "M";
+    if (Math.abs(value) >= 1e9)  return "$" + (value / 1e9).toFixed(2)  + "B";
+    if (Math.abs(value) >= 1e6)  return "$" + (value / 1e6).toFixed(2)  + "M";
     return "$" + value.toFixed(2);
   }
   return value.toFixed(2);
+}
+
+function formatMetricValue(value: number, metric: MetricKey): string {
+  if (metric === "eps") return `$${value.toFixed(2)}`;
+  const abs = Math.abs(value);
+  if (abs >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+  if (abs >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+  return `$${value.toLocaleString()}`;
 }
 
 function MetricRow({ label, metric }: { label: string; metric: Metric | null }) {
@@ -36,11 +64,11 @@ function MetricRow({ label, metric }: { label: string; metric: Metric | null }) 
       <span className="text-sm text-muted-foreground">{label}</span>
       {metric ? (
         <div className="text-right">
-          <span className="mono text-sm font-medium">{formatValue(metric.value, metric.unit)}</span>
+          <span className="mono text-sm font-medium">{formatFinancialValue(metric.value, metric.unit)}</span>
           <span className="text-[11px] text-muted-foreground/60 ml-2">{metric.period}</span>
         </div>
       ) : (
-        <span className="text-xs text-muted-foreground/50 italic">—</span>
+        <span className="text-xs text-muted-foreground/50 italic">-</span>
       )}
     </div>
   );
@@ -48,17 +76,23 @@ function MetricRow({ label, metric }: { label: string; metric: Metric | null }) 
 
 export default function CompanyPage({ params }: { params: Promise<{ ticker: string }> }) {
   const router = useRouter();
-  const [ticker, setTicker] = useState("");
-  const [company, setCompany] = useState<Company | null>(null);
-  const [price, setPrice] = useState<number | null | undefined>(undefined);
-  const [filings, setFilings] = useState<Filing[]>([]);
+  const [ticker, setTicker]                 = useState("");
+  const [company, setCompany]               = useState<Company | null>(null);
+  const [price, setPrice]                   = useState<number | null | undefined>(undefined);
+  const [filings, setFilings]               = useState<Filing[]>([]);
   const [filingsMessage, setFilingsMessage] = useState<string | null>(null);
-  const [tab, setTab] = useState<"overview" | "financials" | "filings">("overview");
+  const [tab, setTab]                       = useState<"overview" | "financials" | "filings" | "metrics">("overview");
+
+  const [financials, setFinancials]             = useState<CompanyDetail | null>(null);
+  const [loadingFinancials, setLoadingFinancials] = useState(false);
+
+  const [metric, setMetric]                 = useState<MetricKey>("revenue");
+  const [metricData, setMetricData]         = useState<MetricHistory | null>(null);
+  const [loadingMetrics, setLoadingMetrics] = useState(false);
+
   const [loadingCompany, setLoadingCompany] = useState(true);
   const [loadingFilings, setLoadingFilings] = useState(false);
-  const [financials, setFinancials] = useState<CompanyDetail | null>(null);
-  const [loadingFinancials, setLoadingFinancials] = useState(false);
-  const [notFound, setNotFound] = useState(false);
+  const [notFound, setNotFound]             = useState(false);
 
   useEffect(() => {
     params.then(({ ticker }) => setTicker(ticker.toUpperCase()));
@@ -105,6 +139,17 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
       .finally(() => setLoadingFilings(false));
   }, [company, tab]);
 
+  useEffect(() => {
+    if (!company || tab !== "metrics") return;
+    setLoadingMetrics(true);
+    setMetricData(null);
+    fetch(`/api/v1/edgar/companies/${company.cik}/metrics/${metric}`)
+      .then((r) => r.json())
+      .then((data: MetricHistory) => setMetricData(data))
+      .catch(() => setMetricData(null))
+      .finally(() => setLoadingMetrics(false));
+  }, [company, tab, metric]);
+
   if (loadingCompany) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -117,7 +162,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">Company not found for ticker <span className="mono">{ticker}</span></p>
-        <Link href="/search" className="chip hover:text-foreground transition-colors">← Back to search</Link>
+        <Link href="/search" className="chip hover:text-foreground transition-colors">Back to search</Link>
       </div>
     );
   }
@@ -136,10 +181,10 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
 
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8">
         <button onClick={() => router.back()} className="chip hover:text-foreground transition-colors w-fit">
-          ← Back
+          Back
         </button>
 
-        <section className="card-modern p-8 noise">
+        <section className="card-modern p-8 noise relative">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex items-center gap-4">
               <div className="size-12 rounded-2xl bg-surface-elevated border border-hairline flex items-center justify-center mono text-sm shrink-0">
@@ -150,7 +195,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
               </div>
             </div>
             <div className="text-right shrink-0">
-              {price === undefined && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+              {price === undefined && <Skeleton className="h-7 w-20" />}
               {price !== undefined && price !== null && (
                 <span className="mono text-2xl">${price.toFixed(2)}</span>
               )}
@@ -163,7 +208,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
         </section>
 
         <nav className="inline-flex gap-1 p-1 rounded-full border border-hairline bg-surface/60">
-          {(["overview", "financials", "filings"] as const).map((t) => (
+          {(["overview", "financials", "filings", "metrics"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -177,7 +222,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
         </nav>
 
         {tab === "overview" && (
-          <section className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="card-modern p-5">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Ticker</p>
               <p className="mono text-2xl mt-2">{company.ticker}</p>
@@ -190,7 +235,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Company name</p>
               <p className="mono text-lg mt-2">{company.name}</p>
             </div>
-          </section>
+          </div>
         )}
 
         {tab === "financials" && (
@@ -199,16 +244,20 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Financial Data · SEC EDGAR</span>
               {financials?.from_cache && <span className="chip">cached</span>}
             </div>
-            {loadingFinancials && <div className="flex justify-center py-8"><Loader2 className="size-5 animate-spin text-muted-foreground" /></div>}
+            {loadingFinancials && (
+              <div className="flex justify-center py-8">
+                <Loader2 className="size-5 animate-spin text-muted-foreground" />
+              </div>
+            )}
             {!loadingFinancials && financials && !financials.financials_available && (
               <p className="text-sm text-muted-foreground italic py-4 text-center">No XBRL financial data available for this company</p>
             )}
             {!loadingFinancials && financials?.financials_available && (
               <div>
-                <MetricRow label="Revenue" metric={financials.revenue} />
-                <MetricRow label="Net Income" metric={financials.net_income} />
-                <MetricRow label="EPS (basic)" metric={financials.eps} />
-                <MetricRow label="Total Assets" metric={financials.total_assets} />
+                <MetricRow label="Revenue"           metric={financials.revenue} />
+                <MetricRow label="Net Income"        metric={financials.net_income} />
+                <MetricRow label="EPS (basic)"       metric={financials.eps} />
+                <MetricRow label="Total Assets"      metric={financials.total_assets} />
                 <MetricRow label="Total Liabilities" metric={financials.total_liabilities} />
               </div>
             )}
@@ -218,33 +267,146 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
         {tab === "filings" && (
           <section className="space-y-3">
             {loadingFilings && (
-              <div className="flex justify-center py-12">
-                <Loader2 className="size-5 animate-spin text-muted-foreground" />
+              <div className="card-modern overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...Array(4)].map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell />
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
-
             {!loadingFilings && filingsMessage && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-sm">{filingsMessage}</p>
               </div>
             )}
+            {!loadingFilings && filings.length > 0 && (
+              <div className="card-modern overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Filing</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filings.map((f, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <span className="mono text-xs bg-primary/15 text-primary px-2.5 py-1 rounded-md">{f.type}</span>
+                        </TableCell>
+                        <TableCell className="mono text-xs text-muted-foreground">{f.date}</TableCell>
+                        <TableCell className="text-right">
+                          <a href={f.url} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                            SEC EDGAR submission
+                            <ExternalLink className="size-3" />
+                          </a>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </section>
+        )}
 
-            {!loadingFilings && filings.map((f, i) => (
-              <a
-                key={i}
-                href={f.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="card-modern p-4 flex items-center gap-4 hover:bg-surface-elevated transition-colors"
-              >
-                <span className="mono text-xs bg-primary/15 text-primary px-2.5 py-1 rounded-md shrink-0">
-                  {f.type}
-                </span>
-                <span className="text-sm flex-1">SEC EDGAR submission</span>
-                <span className="mono text-xs text-muted-foreground">{f.date}</span>
-                <ExternalLink className="size-3.5 text-muted-foreground shrink-0" />
-              </a>
-            ))}
+        {tab === "metrics" && (
+          <section className="space-y-4">
+            <div className="flex gap-2" data-testid="metric-selector">
+              {METRICS.map((m) => (
+                <button
+                  key={m.key}
+                  data-testid={`metric-btn-${m.key}`}
+                  onClick={() => setMetric(m.key)}
+                  className={`chip transition-colors ${
+                    metric === m.key ? "bg-primary text-primary-foreground" : "hover:text-foreground"
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+
+            {loadingMetrics && (
+              <div className="card-modern overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Period</TableHead>
+                      <TableHead>Value</TableHead>
+                      <TableHead>Form</TableHead>
+                      <TableHead>Filed</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...Array(4)].map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            {!loadingMetrics && metricData && metricData.data_points.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-sm">No historical data available for this metric.</p>
+              </div>
+            )}
+
+            {!loadingMetrics && metricData && metricData.data_points.length > 0 && (
+              <>
+                <div className="card-modern overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Period end</TableHead>
+                        <TableHead className="text-right">Value</TableHead>
+                        <TableHead>Form</TableHead>
+                        <TableHead>Filed</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {metricData.data_points.map((dp, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="mono text-xs text-muted-foreground">{dp.period_end}</TableCell>
+                          <TableCell className="mono text-sm text-right">{formatMetricValue(dp.value, metric)}</TableCell>
+                          <TableCell>
+                            <span className="mono text-xs bg-primary/15 text-primary px-2.5 py-1 rounded-md">{dp.form}</span>
+                          </TableCell>
+                          <TableCell className="mono text-xs text-muted-foreground">{dp.filed}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {metricData.cached && (
+                  <p className="text-[11px] text-muted-foreground/50 text-right" data-testid="cached-badge">
+                    Cached · refreshes every hour
+                  </p>
+                )}
+              </>
+            )}
           </section>
         )}
       </main>

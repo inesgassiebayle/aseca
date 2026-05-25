@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Optional
+from typing import Annotated, Optional
 
 import httpx
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -12,13 +12,19 @@ from app.services.edgar_service import CompanyDetailService, EdgarService, TtlCa
 
 router = APIRouter()
 
-_edgar_cache = TtlCache()
+_edgar_cache   = TtlCache()
 _filings_cache = TtlKeyedCache()
+_metrics_cache = TtlKeyedCache()
 
 
 def get_edgar_service():
     with httpx.Client() as client:
-        yield EdgarService(client, cache=_edgar_cache, filings_cache=_filings_cache)
+        yield EdgarService(
+            client,
+            cache=_edgar_cache,
+            filings_cache=_filings_cache,
+            metrics_cache=_metrics_cache,
+        )
 
 
 def get_company_detail_service(db: Session = Depends(get_db)) -> CompanyDetailService:
@@ -30,24 +36,32 @@ class CompanyResult(BaseModel):
     ticker: str
     cik: int
 
-
 class Filing(BaseModel):
     type: str
     date: str
     url: str
 
-
 class FilingsResponse(BaseModel):
     filings: list[Filing]
     message: str | None = None
 
+class MetricDataPoint(BaseModel):
+    period_end: str
+    value: float
+    form: str
+    filed: str
+
+class MetricHistoryResponse(BaseModel):
+    cik: int
+    metric: str
+    data_points: list[MetricDataPoint]
+    cached: bool
 
 class FinancialMetricOut(BaseModel):
     concept: str
     value: float
     unit: str
     period: str
-
 
 class CompanyDetailOut(BaseModel):
     cik: str
@@ -78,7 +92,6 @@ def get_company_financials(
     service: CompanyDetailService = Depends(get_company_detail_service),
 ):
     result = service.get_company_detail(cik, ticker)
-
     out = CompanyDetailOut(
         cik=result.cik,
         ticker=result.ticker,
@@ -87,7 +100,6 @@ def get_company_financials(
         financials_available=result.financials is not None,
         from_cache=result.financials.from_cache if result.financials else False,
     )
-
     if result.financials:
         f = result.financials
         if f.revenue:
@@ -100,7 +112,6 @@ def get_company_financials(
             out.total_assets = FinancialMetricOut(**vars(f.total_assets))
         if f.total_liabilities:
             out.total_liabilities = FinancialMetricOut(**vars(f.total_liabilities))
-
     return out
 
 
@@ -109,3 +120,17 @@ def get_filings(cik: int, service: EdgarService = Depends(get_edgar_service)):
     filings = service.get_filings(cik)
     message = "Esta empresa no tiene filings 10-K o 10-Q disponibles." if not filings else None
     return FilingsResponse(filings=filings, message=message)
+
+
+@router.get("/companies/{cik}/metrics/{metric}", response_model=MetricHistoryResponse)
+def get_metric_history(
+    cik: int,
+    metric: str,
+    quarters: Annotated[int, Query(ge=1, le=8)] = 8,
+    service: EdgarService = Depends(get_edgar_service),
+):
+    try:
+        result = service.get_metric_history(cik=cik, metric=metric, quarters=quarters)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return MetricHistoryResponse(**result)

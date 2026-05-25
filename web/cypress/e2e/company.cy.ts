@@ -65,7 +65,7 @@ describe("Company page", () => {
   });
 
   it("tiene un botón de vuelta", () => {
-    cy.contains("← Back").should("be.visible");
+    cy.contains("Back").should("be.visible");
   });
 
   it("muestra el logo StockWatch con link a home", () => {
@@ -222,6 +222,6 @@ describe("Company page — empresa no encontrada", () => {
     cy.wait("@search");
 
     cy.contains("XYZFAKE").should("be.visible");
-    cy.contains("← Back to search").should("be.visible");
+    cy.contains("Back to search").should("be.visible");
   });
 });

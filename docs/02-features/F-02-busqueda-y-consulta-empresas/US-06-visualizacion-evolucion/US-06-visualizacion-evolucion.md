@@ -1,4 +1,4 @@
-### US-15 — Ver evolución histórica de métricas de una empresa
+### US-06 — Ver evolución histórica de métricas de una empresa
 > Como usuario, quiero ver la evolución de una métrica financiera a lo largo
 > de los últimos quarters, para analizar la tendencia de la empresa.
 

@@ -1,29 +1,29 @@
-import { remote } from "webdriverio";
+import { Browser } from "webdriverio";
+import { createCleanDriver } from "./helpers/driver";
 
-describe("Home screen", () => {
-  let driver: Awaited<ReturnType<typeof remote>>;
+// Verifica que la app arranca correctamente y llega a login.
+// Si este test falla, todos los demás también fallarían.
+describe("App boot", () => {
+  let driver: Browser;
 
-  before(async () => {
-    driver = await remote({
-      hostname: "localhost",
-      port: 4723,
-      capabilities: {
-        platformName: "Android",
-        "appium:automationName": "UiAutomator2",
-        "appium:deviceName": "emulator-5554",
-        "appium:appPackage": "com.aseca.mobile",
-        "appium:appActivity": ".MainActivity",
-        "appium:noReset": true,
-      },
-    });
-  });
+  beforeAll(async () => {
+    driver = await createCleanDriver();
+  }, 30000);
 
-  after(async () => {
+  afterAll(async () => {
     await driver?.deleteSession();
   });
 
-  it("shows app title", async () => {
-    const el = await driver.$("~Aseca");
-    await expect(el).toBeDisplayed();
+  it("boots directly into the login screen", async () => {
+    expect(await (await driver.$("~title")).getText()).toBe("Sign in");
+  });
+
+  it("shows email and password inputs on boot", async () => {
+    expect(await (await driver.$("~email")).isDisplayed()).toBe(true);
+    expect(await (await driver.$("~password")).isDisplayed()).toBe(true);
+  });
+
+  it("shows link to register from login screen", async () => {
+    expect(await (await driver.$("~go-to-register")).isDisplayed()).toBe(true);
   });
 });

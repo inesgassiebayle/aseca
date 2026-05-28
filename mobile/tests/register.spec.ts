@@ -1,97 +1,61 @@
-import { remote } from "webdriverio";
-
-const CAPS = {
-  platformName: "Android",
-  "appium:automationName": "UiAutomator2",
-  "appium:deviceName": "emulator-5554",
-  "appium:appPackage": "com.aseca.mobile",
-  "appium:appActivity": ".MainActivity",
-  "appium:noReset": true,
-};
+import { Browser } from "webdriverio";
+import { createCleanDriver } from "./helpers/driver";
 
 describe("Register screen", () => {
-  let driver: Awaited<ReturnType<typeof remote>>;
+  let driver: Browser;
 
-  before(async () => {
-    driver = await remote({ hostname: "localhost", port: 4723, capabilities: CAPS });
-  });
+  beforeAll(async () => {
+    driver = await createCleanDriver();
+    // Estamos en login → navegamos a register
+    await (await driver.$("~go-to-register")).click();
+    await (await driver.$("~confirm-password")).waitForDisplayed({ timeout: 10000 });
+    // Driver posicionado en: Register screen
+  }, 30000);
 
-  after(async () => {
+  afterAll(async () => {
     await driver?.deleteSession();
   });
 
-  beforeEach(async () => {
-    const goToRegister = await driver.$("~go-to-register");
-    await goToRegister.click();
-  });
-
-  afterEach(async () => {
-    await driver.back();
-  });
+  // Tests 1-4 se quedan en register (errores de validación no redirigen).
+  // Test 5 va a login y vuelve explícitamente.
 
   it("renders the form with all fields", async () => {
-    const title = await driver.$("~title");
-    await expect(title).toHaveText("Create account");
-
-    const email = await driver.$("~email");
-    await expect(email).toBeDisplayed();
-
-    const password = await driver.$("~password");
-    await expect(password).toBeDisplayed();
-
-    const confirmPassword = await driver.$("~confirm-password");
-    await expect(confirmPassword).toBeDisplayed();
-
-    const submit = await driver.$("~submit");
-    await expect(submit).toBeDisplayed();
+    expect(await (await driver.$("~title")).getText()).toBe("Create account");
+    expect(await (await driver.$("~email")).isDisplayed()).toBe(true);
+    expect(await (await driver.$("~password")).isDisplayed()).toBe(true);
+    expect(await (await driver.$("~confirm-password")).isDisplayed()).toBe(true);
+    expect(await (await driver.$("~submit")).isDisplayed()).toBe(true);
   });
 
   it("shows a link to sign in", async () => {
-    const link = await driver.$("~go-to-login");
-    await expect(link).toBeDisplayed();
+    expect(await (await driver.$("~go-to-login")).isDisplayed()).toBe(true);
   });
 
   it("shows error when passwords don't match", async () => {
-    const email = await driver.$("~email");
-    await email.setValue("test@example.com");
-
-    const password = await driver.$("~password");
-    await password.setValue("Password123!");
-
-    const confirmPassword = await driver.$("~confirm-password");
-    await confirmPassword.setValue("Different123!");
-
-    const submit = await driver.$("~submit");
-    await submit.click();
-
-    const error = await driver.$("~error");
-    await expect(error).toHaveText("Passwords don't match");
+    await (await driver.$("~email")).setValue("test@example.com");
+    await (await driver.$("~password")).setValue("Password123!");
+    await (await driver.$("~confirm-password")).setValue("Different123!");
+    await (await driver.$("~submit")).click();
+    await (await driver.$("~error")).waitForDisplayed({ timeout: 5000 });
+    expect(await (await driver.$("~error")).getText()).toBe("Passwords don't match");
+    // Sigue en register — validación client-side no redirige
   });
 
   it("shows error message on failed registration", async () => {
-    const email = await driver.$("~email");
-    await email.setValue("existing@example.com");
-
-    const password = await driver.$("~password");
-    await password.setValue("Password123!");
-
-    const confirmPassword = await driver.$("~confirm-password");
-    await confirmPassword.setValue("Password123!");
-
-    const submit = await driver.$("~submit");
-    await submit.click();
-
-    const error = await driver.$("~error");
-    await expect(error).toBeDisplayed();
+    await (await driver.$("~email")).setValue("existing@example.com");
+    await (await driver.$("~password")).setValue("Password123!");
+    await (await driver.$("~confirm-password")).setValue("Password123!");
+    await (await driver.$("~submit")).click();
+    await (await driver.$("~error")).waitForDisplayed({ timeout: 5000 });
+    expect(await (await driver.$("~error")).isDisplayed()).toBe(true);
+    // Sigue en register — error de servidor no redirige
   });
 
   it("navigates to login screen when tapping the link", async () => {
-    const link = await driver.$("~go-to-login");
-    await link.click();
-
-    const title = await driver.$("~title");
-    await expect(title).toHaveText("Sign in");
-
-    await driver.back();
+    await (await driver.$("~go-to-login")).click();
+    await (await driver.$("~title")).waitForDisplayed({ timeout: 5000 });
+    expect(await (await driver.$("~title")).getText()).toBe("Sign in");
+    await driver.back(); // login → register
+    await (await driver.$("~confirm-password")).waitForDisplayed({ timeout: 5000 });
   });
 });

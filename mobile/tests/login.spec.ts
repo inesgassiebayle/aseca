@@ -1,74 +1,46 @@
-import { remote } from "webdriverio";
-
-const CAPS = {
-  platformName: "Android",
-  "appium:automationName": "UiAutomator2",
-  "appium:deviceName": "emulator-5554",
-  "appium:appPackage": "com.aseca.mobile",
-  "appium:appActivity": ".MainActivity",
-  "appium:noReset": true,
-};
+import { Browser } from "webdriverio";
+import { createCleanDriver } from "./helpers/driver";
 
 describe("Login screen", () => {
-  let driver: Awaited<ReturnType<typeof remote>>;
+  let driver: Browser;
 
-  before(async () => {
-    driver = await remote({ hostname: "localhost", port: 4723, capabilities: CAPS });
-  });
+  beforeAll(async () => {
+    driver = await createCleanDriver();
+    // Ya en login screen — sin navigate
+  }, 30000);
 
-  after(async () => {
+  afterAll(async () => {
     await driver?.deleteSession();
   });
 
-  beforeEach(async () => {
-    const goToLogin = await driver.$("~go-to-login");
-    await goToLogin.click();
-  });
-
-  afterEach(async () => {
-    await driver.back();
-  });
+  // Sin beforeEach: los tests 1-3 no navegan, se quedan en login.
+  // El test 4 navega a register y vuelve explícitamente.
 
   it("renders the form with all fields", async () => {
-    const title = await driver.$("~title");
-    await expect(title).toHaveText("Sign in");
-
-    const email = await driver.$("~email");
-    await expect(email).toBeDisplayed();
-
-    const password = await driver.$("~password");
-    await expect(password).toBeDisplayed();
-
-    const submit = await driver.$("~submit");
-    await expect(submit).toBeDisplayed();
+    expect(await (await driver.$("~title")).getText()).toBe("Sign in");
+    expect(await (await driver.$("~email")).isDisplayed()).toBe(true);
+    expect(await (await driver.$("~password")).isDisplayed()).toBe(true);
+    expect(await (await driver.$("~submit")).isDisplayed()).toBe(true);
   });
 
   it("shows a link to create account", async () => {
-    const link = await driver.$("~go-to-register");
-    await expect(link).toBeDisplayed();
+    expect(await (await driver.$("~go-to-register")).isDisplayed()).toBe(true);
   });
 
   it("shows error message on invalid credentials", async () => {
-    const email = await driver.$("~email");
-    await email.setValue("user@mail.com");
-
-    const password = await driver.$("~password");
-    await password.setValue("wrongpassword");
-
-    const submit = await driver.$("~submit");
-    await submit.click();
-
-    const error = await driver.$("~error");
-    await expect(error).toBeDisplayed();
+    await (await driver.$("~email")).setValue("user@mail.com");
+    await (await driver.$("~password")).setValue("wrongpassword");
+    await (await driver.$("~submit")).click();
+    await (await driver.$("~error")).waitForDisplayed({ timeout: 5000 });
+    expect(await (await driver.$("~error")).isDisplayed()).toBe(true);
+    // Sigue en login screen con error visible — OK para el test siguiente
   });
 
   it("navigates to register screen when tapping the link", async () => {
-    const link = await driver.$("~go-to-register");
-    await link.click();
-
-    const title = await driver.$("~title");
-    await expect(title).toHaveText("Create account");
-
-    await driver.back();
+    await (await driver.$("~go-to-register")).click();
+    await (await driver.$("~title")).waitForDisplayed({ timeout: 5000 });
+    expect(await (await driver.$("~title")).getText()).toBe("Create account");
+    await driver.back(); // register → login
+    await (await driver.$("~email")).waitForDisplayed({ timeout: 5000 });
   });
 });

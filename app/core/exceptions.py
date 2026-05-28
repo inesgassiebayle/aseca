@@ -20,3 +20,7 @@ class InsufficientSharesError(Exception):
 
 class PositionNotFoundError(Exception):
     pass
+
+class TickerAlreadyInWatchlistError(Exception):
+    def __init__(self, ticker: str):
+        super().__init__(f"{ticker} already in watchlist")

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.models import WatchlistItem
-from app.core.exceptions import TickerAlreadyInWatchlistError
+from app.core.exceptions import TickerAlreadyInWatchlistError, TickerNotInWatchlistError
 
 
 class WatchlistService:
@@ -23,3 +23,16 @@ class WatchlistService:
         self.db.commit()
         self.db.refresh(item)
         return item
+
+    def remove(self, user_id: int, ticker: str) -> None:
+        ticker = ticker.upper()
+        item = self.db.query(WatchlistItem).filter(
+            WatchlistItem.user_id == user_id,
+            WatchlistItem.ticker == ticker,
+            ).first()
+
+        if not item:
+            raise TickerNotInWatchlistError(ticker)
+
+        self.db.delete(item)
+        self.db.commit()

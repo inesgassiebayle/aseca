@@ -24,3 +24,7 @@ class PositionNotFoundError(Exception):
 class TickerAlreadyInWatchlistError(Exception):
     def __init__(self, ticker: str):
         super().__init__(f"{ticker} already in watchlist")
+
+class TickerNotInWatchlistError(Exception):
+    def __init__(self, ticker: str):
+        super().__init__(f"{ticker} not in watchlist")

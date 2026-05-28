@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.models import WatchlistItem
+from app.models.models import WatchlistItem, StockPrice
 from app.core.exceptions import TickerAlreadyInWatchlistError, TickerNotInWatchlistError
 
 
@@ -36,3 +36,22 @@ class WatchlistService:
 
         self.db.delete(item)
         self.db.commit()
+
+    def get_watchlist(self, user_id: int) -> list[dict]:
+        items = self.db.query(WatchlistItem).filter(
+            WatchlistItem.user_id == user_id
+        ).all()
+
+        result = []
+        for item in items:
+            price_row = self.db.query(StockPrice).filter(
+                StockPrice.ticker == item.ticker
+            ).first()
+
+            result.append({
+                "id": item.id,
+                "ticker": item.ticker,
+                "price": price_row.price if price_row else None,
+                "updated_at": price_row.updated_at if price_row else None,
+            })
+        return result

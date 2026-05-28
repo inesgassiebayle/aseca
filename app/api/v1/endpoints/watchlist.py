@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from app.core.dependencies import get_current_user
 from app.core.exceptions import TickerAlreadyInWatchlistError, TickerNotInWatchlistError
@@ -21,6 +22,13 @@ class WatchlistItemResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+class WatchlistItemWithPriceResponse(BaseModel):
+    id: int
+    ticker: str
+    price: float | None = None
+    updated_at: datetime | None = None
+
+    model_config = {"from_attributes": True}
 
 @router.post("/", response_model=WatchlistItemResponse, status_code=status.HTTP_201_CREATED)
 def add_to_watchlist(
@@ -43,3 +51,10 @@ def remove_from_watchlist(
         WatchlistService(db).remove(user_id=current_user.id, ticker=ticker)
     except TickerNotInWatchlistError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+@router.get("/", response_model=list[WatchlistItemWithPriceResponse])
+def get_watchlist(
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+):
+    return WatchlistService(db).get_watchlist(user_id=current_user.id)

@@ -19,7 +19,7 @@ export function Navbar() {
     return (
         <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-hairline">
             <div className="mx-auto max-w-6xl px-5 py-3.5 flex items-center justify-between gap-4">
-                <Link href="/portfolio" className="flex items-center gap-2.5">
+                <Link href="/" className="flex items-center gap-2.5">
                     <div className="size-7 rounded-lg ring-grad flex items-center justify-center">
                         <div className="size-3 rounded-sm bg-background" />
                     </div>

@@ -11,10 +11,10 @@ import { router } from "expo-router";
 const API_BASE = "http://10.0.2.2:8000";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [error, setError]       = useState<string | null>(null);
+  const [loading, setLoading]   = useState(false);
 
   async function handleSubmit() {
     setError(null);
@@ -26,13 +26,14 @@ export default function LoginScreen() {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         setError(data.detail ?? "Invalid credentials");
         return;
       }
 
-      router.replace("/");
+      router.replace("/search");
     } catch {
       setError("Network error, please try again");
     } finally {
@@ -42,10 +43,9 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title} testID="title">
+      <Text style={styles.title} testID="title" accessibilityLabel="title">
         Sign in
       </Text>
-
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -54,8 +54,8 @@ export default function LoginScreen() {
         keyboardType="email-address"
         autoCapitalize="none"
         testID="email"
+        accessibilityLabel="email"
       />
-
       <TextInput
         style={styles.input}
         placeholder="Password"
@@ -63,28 +63,28 @@ export default function LoginScreen() {
         onChangeText={setPassword}
         secureTextEntry
         testID="password"
+        accessibilityLabel="password"
       />
-
       {error && (
-        <Text style={styles.error} testID="error">
+        <Text style={styles.error} testID="error" accessibilityLabel="error">
           {error}
         </Text>
       )}
-
       <TouchableOpacity
         style={[styles.button, loading && styles.buttonDisabled]}
         onPress={handleSubmit}
         disabled={loading}
         testID="submit"
+        accessibilityLabel="submit"
       >
         <Text style={styles.buttonText}>
           {loading ? "Signing in…" : "Sign in"}
         </Text>
       </TouchableOpacity>
-
       <TouchableOpacity
         onPress={() => router.push("/register")}
         testID="go-to-register"
+        accessibilityLabel="go-to-register"
       >
         <Text style={styles.link}>No account? Register</Text>
       </TouchableOpacity>
@@ -100,11 +100,7 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: "#fff",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 32,
-  },
+  title: { fontSize: 28, fontWeight: "bold", marginBottom: 32 },
   input: {
     width: "100%",
     borderWidth: 1,
@@ -115,11 +111,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 16,
   },
-  error: {
-    color: "#e00",
-    marginBottom: 12,
-    textAlign: "center",
-  },
+  error: { color: "#e00", marginBottom: 12, textAlign: "center" },
   button: {
     width: "100%",
     backgroundColor: "#000",
@@ -128,16 +120,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  link: {
-    color: "#555",
-    fontSize: 14,
-  },
+  buttonDisabled: { opacity: 0.5 },
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  link: { color: "#555", fontSize: 14 },
 });

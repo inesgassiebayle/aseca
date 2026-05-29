@@ -38,7 +38,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       const data = await res.json();
       localStorage.setItem("access_token", data.access_token);
-      router.push("/");
+      router.push("/search");
     } catch {
       setError("Network error, please try again");
     } finally {
@@ -59,7 +59,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           <div className="size-7 rounded-lg ring-grad flex items-center justify-center">
             <div className="size-3 rounded-sm bg-background" />
           </div>
-          <span className="text-[15px] font-semibold tracking-tight">Aseca</span>
+          <span className="text-[15px] font-semibold tracking-tight">StockWatch</span>
         </Link>
         <div className="relative">
           <h2 className="display text-5xl md:text-6xl grad-text leading-[1]">
@@ -69,7 +69,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             SEC EDGAR · Yahoo Finance
           </p>
         </div>
-        <p className="text-[11px] text-muted-foreground relative">© 2026 Aseca</p>
+        <p className="text-[11px] text-muted-foreground relative">© 2026 StockWatch</p>
       </aside>
 
       <section className="flex items-center justify-center p-6 md:p-12 relative">

@@ -1,15 +1,35 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from app.api.v1.endpoints import auth, portfolio, operations, watchlist, edgar, prices
 from app.core.config import settings
-from app.db.session import Base, engine
+from app.core.whitelist import TICKER_WHITELIST
+from app.db.session import Base, engine, SessionLocal
+from app.integrations.yahoo_finance import YahooFinanceClient
 from app.models import models  # noqa: F401
+from app.services.price_service import PriceService
+
+
+def _run_price_batch() -> None:
+    db = SessionLocal()
+    try:
+        PriceService(db, YahooFinanceClient(), TICKER_WHITELIST).run_batch()
+    finally:
+        db.close()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(_run_price_batch, CronTrigger(hour=3, minute=0))
+    scheduler.start()
+
     yield
+
+    scheduler.shutdown(wait=False)
 
 
 app = FastAPI(

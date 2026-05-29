@@ -2,20 +2,11 @@
 
 Appium tests:
 
-# Solo home
-NODE_OPTIONS=--experimental-vm-modules npx jest tests/home.spec.ts --runInBand
+# Suite 1 — register:
+cd mobile && NODE_OPTIONS=--experimental-vm-modules npx jest --config jest.e2e.config.js tests/auth-register.spec.ts
 
-# Solo login
-NODE_OPTIONS=--experimental-vm-modules npx jest tests/login.spec.ts --runInBand
+# Suite 2 — login + search + company:
+cd mobile && NODE_OPTIONS=--experimental-vm-modules npx jest --config jest.e2e.config.js tests/auth-login-and-search.spec.ts
 
-# Solo register
-NODE_OPTIONS=--experimental-vm-modules npx jest tests/register.spec.ts --runInBand
-
-# Solo search
-NODE_OPTIONS=--experimental-vm-modules npx jest tests/search.spec.ts --runInBand
-
-# Solo company 
-NODE_OPTIONS=--experimental-vm-modules npx jest tests/company.spec.ts --runInBand
-
-# Todos juntos
-NODE_OPTIONS=--experimental-vm-modules npx jest --testPathPattern=tests/ --runInBand
+# Ambas juntas:
+cd mobile && NODE_OPTIONS=--experimental-vm-modules npx jest --config jest.e2e.config.js tests/auth-register.spec.ts tests/auth-login-and-search.spec.ts

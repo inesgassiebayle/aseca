@@ -115,32 +115,38 @@ describe("Auth → Search → Company (full flow)", () => {
     expect(listExists || emptyExists).toBe(true);
   });
 
-  it("company: shows metric tabs for revenue, net_income and eps", async () => {
-    expect(await (await driver.$("~metric-tab-revenue")).isDisplayed()).toBe(true);
-    expect(await (await driver.$("~metric-tab-net_income")).isDisplayed()).toBe(true);
-    expect(await (await driver.$("~metric-tab-eps")).isDisplayed()).toBe(true);
-  });
+    it("company: shows metric tabs for revenue, net_income and eps", async () => {
+        await driver.execute("mobile: scroll", { strategy: "accessibility id", selector: "metric-tab-revenue", direction: "down" });
+        await driver.pause(1000);
+        expect(await (await driver.$("~metric-tab-revenue")).isDisplayed()).toBe(true);
+        expect(await (await driver.$("~metric-tab-net_income")).isDisplayed()).toBe(true);
+        expect(await (await driver.$("~metric-tab-eps")).isDisplayed()).toBe(true);
+    });
 
-  it("company: shows revenue history data or empty message", async () => {
-    await driver.pause(3000);
-    const dataExists  = await driver.$("~metric-data").isDisplayed().catch(() => false);
-    const emptyExists = await driver.$("~no-metric-data").isDisplayed().catch(() => false);
-    expect(dataExists || emptyExists).toBe(true);
-  });
+    it("company: shows revenue history data or empty message", async () => {
+        await driver.pause(3000);
+        const dataExists  = await driver.$("~metric-data").isDisplayed().catch(() => false);
+        const emptyExists = await driver.$("~no-metric-data").isDisplayed().catch(() => false);
+        expect(dataExists || emptyExists).toBe(true);
+    });
 
-  it("company: switches to net_income metric on tab tap", async () => {
-    await (await driver.$("~metric-tab-net_income")).click();
-    await driver.pause(2000);
-    const dataExists  = await driver.$("~metric-data").isDisplayed().catch(() => false);
-    const emptyExists = await driver.$("~no-metric-data").isDisplayed().catch(() => false);
-    expect(dataExists || emptyExists).toBe(true);
-  });
+    it("company: switches to net_income metric on tab tap", async () => {
+        await driver.execute("mobile: scroll", { strategy: "accessibility id", selector: "metric-tab-net_income", direction: "down" });
+        await driver.pause(500);
+        await (await driver.$("~metric-tab-net_income")).click();
+        await driver.pause(2000);
+        const dataExists  = await driver.$("~metric-data").isDisplayed().catch(() => false);
+        const emptyExists = await driver.$("~no-metric-data").isDisplayed().catch(() => false);
+        expect(dataExists || emptyExists).toBe(true);
+    });
 
-  it("company: switches to eps metric on tab tap", async () => {
-    await (await driver.$("~metric-tab-eps")).click();
-    await driver.pause(2000);
-    const dataExists  = await driver.$("~metric-data").isDisplayed().catch(() => false);
-    const emptyExists = await driver.$("~no-metric-data").isDisplayed().catch(() => false);
-    expect(dataExists || emptyExists).toBe(true);
-  });
+    it("company: switches to eps metric on tab tap", async () => {
+        await driver.execute("mobile: scroll", { strategy: "accessibility id", selector: "metric-tab-eps", direction: "down" });
+        await driver.pause(500);
+        await (await driver.$("~metric-tab-eps")).click();
+        await driver.pause(2000);
+        const dataExists  = await driver.$("~metric-data").isDisplayed().catch(() => false);
+        const emptyExists = await driver.$("~no-metric-data").isDisplayed().catch(() => false);
+        expect(dataExists || emptyExists).toBe(true);
+    });
 });

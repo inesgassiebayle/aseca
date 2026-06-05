@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
     StyleSheet,
     Text,
@@ -55,7 +55,7 @@ export default function PortfolioScreen() {
 
     if (loading) return (
         <View style={styles.center}>
-            <ActivityIndicator size="large" />
+            <ActivityIndicator size="large" testID="portfolio-loading" accessibilityLabel="portfolio-loading" />
         </View>
     );
 
@@ -64,18 +64,34 @@ export default function PortfolioScreen() {
             {/* Hero */}
             <View style={styles.hero}>
                 <Text style={styles.heroLabel}>Total portfolio value</Text>
-                <Text style={styles.heroValue} testID="total-value">{fmtMoney(totalValue)}</Text>
-                <Text style={[styles.heroPnl, { color: totalPnl >= 0 ? "#22c55e" : "#ef4444" }]} testID="total-pnl">
+                <Text style={styles.heroValue} testID="total-value" accessibilityLabel="total-value">
+                    {fmtMoney(totalValue)}
+                </Text>
+                <Text
+                    style={[styles.heroPnl, { color: totalPnl >= 0 ? "#22c55e" : "#ef4444" }]}
+                    testID="total-pnl"
+                    accessibilityLabel="total-pnl"
+                >
                     {totalPnl >= 0 ? "+" : ""}{fmtMoney(totalPnl)}
                 </Text>
             </View>
 
             {/* Botones */}
             <View style={styles.actions}>
-                <TouchableOpacity style={styles.btnPrimary} onPress={() => router.push("/buy")} testID="buy-button">
+                <TouchableOpacity
+                    style={styles.btnPrimary}
+                    onPress={() => router.push("/buy")}
+                    testID="buy-button"
+                    accessibilityLabel="buy-button"
+                >
                     <Text style={styles.btnPrimaryText}>+ Buy</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.btnSecondary} onPress={() => router.push("/operations")} testID="operations-button">
+                <TouchableOpacity
+                    style={styles.btnSecondary}
+                    onPress={() => router.push("/operations")}
+                    testID="operations-button"
+                    accessibilityLabel="operations-button"
+                >
                     <Text style={styles.btnSecondaryText}>Activity</Text>
                 </TouchableOpacity>
             </View>
@@ -83,7 +99,9 @@ export default function PortfolioScreen() {
             {error && <Text style={styles.error}>{error}</Text>}
 
             {positions.length === 0 ? (
-                <Text style={styles.empty} testID="empty-message">No tenés posiciones todavía.</Text>
+                <Text style={styles.empty} testID="empty-message" accessibilityLabel="empty-message">
+                    No tenés posiciones todavía.
+                </Text>
             ) : (
                 <FlatList
                     data={positions}
@@ -93,6 +111,7 @@ export default function PortfolioScreen() {
                             style={styles.row}
                             onPress={() => router.push({ pathname: "/sell", params: { ticker: p.ticker } })}
                             testID={`position-${p.ticker}`}
+                            accessibilityLabel={`position-${p.ticker}`}
                         >
                             <View style={styles.rowLeft}>
                                 <View style={styles.avatar}>

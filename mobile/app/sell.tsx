@@ -46,7 +46,9 @@ export default function SellScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title} testID="title">Vender {ticker}</Text>
+            <Text style={styles.title} testID="title" accessibilityLabel="title">
+                Vender {ticker}
+            </Text>
 
             <TextInput
                 style={styles.input}
@@ -55,20 +57,26 @@ export default function SellScreen() {
                 onChangeText={setQuantity}
                 keyboardType="numeric"
                 testID="quantity-input"
+                accessibilityLabel="quantity-input"
             />
 
-            {error && <Text style={styles.error} testID="error">{error}</Text>}
+            {error && (
+                <Text style={styles.error} testID="error" accessibilityLabel="error">
+                    {error}
+                </Text>
+            )}
 
             <TouchableOpacity
                 style={[styles.button, styles.buttonSell, loading && styles.buttonDisabled]}
                 onPress={handleSubmit}
                 disabled={loading}
                 testID="submit"
+                accessibilityLabel="submit"
             >
                 <Text style={styles.buttonText}>{loading ? "Procesando…" : "Confirmar venta"}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => router.back()} testID="cancel">
+            <TouchableOpacity onPress={() => router.back()} testID="cancel" accessibilityLabel="cancel">
                 <Text style={styles.link}>Cancelar</Text>
             </TouchableOpacity>
         </View>

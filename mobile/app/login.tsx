@@ -35,7 +35,7 @@ export default function LoginScreen() {
             }
 
             await AsyncStorage.setItem("access_token", data.access_token);
-            router.replace("/portfolio");
+            router.replace("/search");
         } catch {
             setError("Network error, please try again");
         } finally {

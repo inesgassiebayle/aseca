@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { BuyDialog } from "@/components/ui/buy-dialog";
+import { SellDialog } from "@/components/ui/sell-dialog";
 
 type Operation = {
     id: number;
@@ -19,6 +20,7 @@ type PositionDetail = {
     avg_price: number;
     current_price: number | null;
     pnl: number | null;
+    pnl_pct: number | null;
     operations: Operation[];
 };
 
@@ -34,23 +36,27 @@ function fmtDate(s: string) {
 
 export default function PositionDetailPage() {
     const { ticker } = useParams<{ ticker: string }>();
+    const router = useRouter();
     const [detail, setDetail] = useState<PositionDetail | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [buyOpen, setBuyOpen] = useState(false);
+    const [sellOpen, setSellOpen] = useState(false);
+
+    async function fetchDetail() {
+        try {
+            const token = localStorage.getItem("access_token");
+            const res = await fetch(`/api/v1/portfolio/${ticker}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            setDetail(data);
+        } catch {
+            setError("No se pudo cargar el detalle de la posición.");
+        }
+    }
 
     useEffect(() => {
-        async function fetchDetail() {
-            try {
-                const token = localStorage.getItem("access_token");
-                const res = await fetch(`/api/v1/portfolio/${ticker}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                setDetail(data);
-            } catch {
-                setError("No se pudo cargar el detalle de la posición.");
-            }
-        }
         fetchDetail();
     }, [ticker]);
 
@@ -69,43 +75,84 @@ export default function PositionDetailPage() {
     const pnlUp = detail.pnl !== null && detail.pnl >= 0;
 
     return (
-        <main className="min-h-screen p-6 md:p-12 space-y-8">
-            <Link
-                href="/portfolio"
-                className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+        <main className="max-w-6xl mx-auto px-6 py-12 space-y-8">
+            <button
+                onClick={() => router.push("/portfolio")}
+                className="chip hover:text-foreground transition-colors w-fit"
             >
-                ← Portfolio
-            </Link>
+                ← Back
+            </button>
 
-            {/* Hero */}
-            <section className="card-modern p-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="size-14 rounded-2xl bg-surface-elevated border border-hairline flex items-center justify-center mono text-sm font-medium shrink-0">
-                            {ticker.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                            <div className="chip mb-1">{ticker}</div>
-                            <h1 className="display text-4xl grad-text">{detail.quantity} shares</h1>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        <div className="rounded-2xl border border-hairline bg-surface/60 p-4">
-                            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Avg cost</span>
-                            <div className="mono text-base mt-2">{fmtMoney(detail.avg_price)}</div>
-                        </div>
-                        <div className="rounded-2xl border border-hairline bg-surface/60 p-4">
-                            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Current price</span>
-                            <div className="mono text-base mt-2">{detail.current_price ? fmtMoney(detail.current_price) : "—"}</div>
-                        </div>
-                        <div className="rounded-2xl border border-hairline bg-surface/60 p-4 col-span-2 md:col-span-1">
-                            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">P&L</span>
-                            <div className={`mono text-base mt-2 ${detail.pnl !== null ? (pnlUp ? "text-positive" : "text-negative") : ""}`}>
-                                {detail.pnl !== null ? fmtMoney(detail.pnl) : "—"}
+            {/* Hero — same layout as Lovable company detail */}
+            <section className="card-modern relative overflow-hidden p-8 noise">
+                <div className="relative grid md:grid-cols-[1.4fr_1fr] gap-8 md:items-end">
+                    {/* Left: avatar + ticker + shares */}
+                    <div>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="size-12 rounded-2xl bg-surface-elevated border border-hairline flex items-center justify-center mono text-sm shrink-0">
+                                {ticker.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                                <div className="mono text-xs text-muted-foreground">{ticker.toUpperCase()}</div>
                             </div>
                         </div>
+                        <h1 className="display text-4xl md:text-6xl grad-text leading-[1]">
+                            {detail.quantity} shares
+                        </h1>
                     </div>
+
+                    {/* Right: price + pnl + buttons */}
+                    <div className="md:text-right">
+                        <div className="mono text-4xl">
+                            {detail.current_price ? `$${detail.current_price.toFixed(2)}` : "—"}
+                        </div>
+                        {detail.pnl !== null && (
+                            <div className={`mono text-sm mt-1 ${pnlUp ? "text-positive" : "text-negative"}`}>
+                                {pnlUp ? "+" : ""}{fmtMoney(detail.pnl)}
+                                {detail.pnl_pct != null && (
+                                    <span className="ml-1">({pnlUp ? "+" : ""}{Number(detail.pnl_pct).toFixed(2)}%)</span>
+                                )}
+                            </div>
+                        )}
+                        <div className="flex md:justify-end gap-2 mt-5">
+                            <button
+                                onClick={() => setBuyOpen(true)}
+                                className="text-[13px] font-medium bg-primary text-primary-foreground px-4 py-2 rounded-full glow-primary"
+                            >
+                                Buy
+                            </button>
+                            <button
+                                onClick={() => setSellOpen(true)}
+                                className="text-[13px] font-medium border border-hairline px-4 py-2 rounded-full hover:bg-surface-elevated transition-colors"
+                            >
+                                Sell
+                            </button>
+                            <button
+                                className="size-9 border border-hairline rounded-full hover:bg-surface-elevated transition-colors flex items-center justify-center"
+                                title="Add to watchlist"
+                            >
+                                ☆
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Metrics cards */}
+            <section className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="card-modern p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Avg cost</p>
+                    <p className="mono text-2xl mt-2">{fmtMoney(detail.avg_price)}</p>
+                </div>
+                <div className="card-modern p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Current price</p>
+                    <p className="mono text-2xl mt-2">{detail.current_price ? `$${detail.current_price.toFixed(2)}` : "—"}</p>
+                </div>
+                <div className="card-modern p-4 col-span-2 md:col-span-1">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">P&L</p>
+                    <p className={`mono text-2xl mt-2 ${detail.pnl !== null ? (pnlUp ? "text-positive" : "text-negative") : ""}`}>
+                        {detail.pnl !== null ? fmtMoney(detail.pnl) : "—"}
+                    </p>
                 </div>
             </section>
 
@@ -153,6 +200,22 @@ export default function PositionDetailPage() {
                     ))}
                 </div>
             </section>
+
+            <BuyDialog
+                open={buyOpen}
+                onClose={() => setBuyOpen(false)}
+                onSuccess={() => fetchDetail()}
+                defaultTicker={ticker.toUpperCase()}
+            />
+
+            <SellDialog
+                ticker={sellOpen ? ticker : null}
+                onClose={() => setSellOpen(false)}
+                onSuccess={() => {
+                    fetchDetail();
+                    if (detail.quantity <= 1) router.push("/portfolio");
+                }}
+            />
         </main>
     );
 }

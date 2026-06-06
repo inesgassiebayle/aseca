@@ -61,12 +61,7 @@ export default function PortfolioPage() {
                     <div className="chip mb-3">Portfolio</div>
                     <h1 className="display text-5xl md:text-6xl grad-text">My holdings</h1>
                 </div>
-                <button
-                    onClick={() => setBuyOpen(true)}
-                    className="bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-[13px] font-medium glow-primary hover:opacity-90 transition-opacity"
-                >
-                    + New position
-                </button>
+
             </header>
 
             {positions.length > 0 && (

@@ -60,22 +60,6 @@ function formatMetricValue(value: number, metric: MetricKey): string {
     return `$${value.toLocaleString()}`;
 }
 
-function MetricRow({ label, metric }: { label: string; metric: Metric | null }) {
-    return (
-        <div className="flex items-center justify-between py-3 border-b border-hairline last:border-0">
-            <span className="text-sm text-muted-foreground">{label}</span>
-            {metric ? (
-                <div className="text-right">
-                    <span className="mono text-sm font-medium">{formatFinancialValue(metric.value, metric.unit)}</span>
-                    <span className="text-[11px] text-muted-foreground/60 ml-2">{metric.period}</span>
-                </div>
-            ) : (
-                <span className="text-xs text-muted-foreground/50 italic">-</span>
-            )}
-        </div>
-    );
-}
-
 export default function CompanyPage({ params }: { params: Promise<{ ticker: string }> }) {
     const router = useRouter();
     const [ticker, setTicker]                 = useState("");
@@ -87,11 +71,11 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
     const [buyOpen, setBuyOpen]               = useState(false);
     const [sellOpen, setSellOpen]             = useState(false);
 
-    const [financials, setFinancials]             = useState<CompanyDetail | null>(null);
+    const [financials, setFinancials]               = useState<CompanyDetail | null>(null);
     const [loadingFinancials, setLoadingFinancials] = useState(false);
 
-    const [metric, setMetric]                 = useState<MetricKey>("revenue");
-    const [metricData, setMetricData]         = useState<MetricHistory | null>(null);
+    const [metric, setMetric]         = useState<MetricKey>("revenue");
+    const [metricData, setMetricData] = useState<MetricHistory | null>(null);
     const [loadingMetrics, setLoadingMetrics] = useState(false);
 
     const [loadingCompany, setLoadingCompany] = useState(true);
@@ -173,59 +157,54 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
 
     return (
         <div className="min-h-screen bg-background">
-            <nav className="border-b border-hairline px-6 py-4 flex items-center justify-between gap-3">
-                <Link href="/" className="flex items-center gap-2.5">
-                    <div className="size-7 rounded-lg ring-grad flex items-center justify-center">
-                        <div className="size-3 rounded-sm bg-background" />
-                    </div>
-                    <span className="text-[15px] font-semibold tracking-tight">StockWatch</span>
-                </Link>
-                <LastUpdateBadge />
-            </nav>
+            <main className="max-w-6xl mx-auto px-6 py-12 space-y-8">
+                <div className="flex items-center justify-between">
+                    <button onClick={() => router.back()} className="chip hover:text-foreground transition-colors w-fit">
+                        ← Back
+                    </button>
+                    <LastUpdateBadge />
+                </div>
 
-            <main className="max-w-3xl mx-auto px-6 py-12 space-y-8">
-                <button onClick={() => router.back()} className="chip hover:text-foreground transition-colors w-fit">
-                    Back
-                </button>
-
-                <section className="card-modern p-8 noise relative">
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                        <div className="flex items-center gap-4">
-                            <div className="size-12 rounded-2xl bg-surface-elevated border border-hairline flex items-center justify-center mono text-sm shrink-0">
-                                {company.ticker.slice(0, 2)}
+                {/* Hero — two column like Lovable */}
+                <section className="card-modern relative overflow-hidden p-8 noise">
+                    <div className="relative grid md:grid-cols-[1.4fr_1fr] gap-8 md:items-end">
+                        <div>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="size-12 rounded-2xl bg-surface-elevated border border-hairline flex items-center justify-center mono text-sm shrink-0">
+                                    {company.ticker.slice(0, 2)}
+                                </div>
+                                <div>
+                                    <div className="mono text-xs text-muted-foreground">{company.ticker} · CIK {company.cik}</div>
+                                </div>
                             </div>
-                            <div>
-                                <div className="mono text-xs text-muted-foreground">{company.ticker} · CIK {company.cik}</div>
+                            <h1 className="display text-4xl md:text-6xl grad-text leading-[1]">{company.name}</h1>
+                        </div>
+
+                        <div className="md:text-right">
+                            <div className="mono text-4xl">
+                                {price === undefined && <Skeleton className="h-10 w-32 ml-auto" />}
+                                {price !== undefined && price !== null && `$${price.toFixed(2)}`}
+                                {price === null && <span className="text-sm text-muted-foreground/60">Price not available</span>}
+                            </div>
+                            <div className="flex md:justify-end gap-2 mt-5">
+                                <button
+                                    onClick={() => setBuyOpen(true)}
+                                    className="text-[13px] font-medium bg-primary text-primary-foreground px-4 py-2 rounded-full glow-primary"
+                                >
+                                    Buy
+                                </button>
+                                <button
+                                    onClick={() => setSellOpen(true)}
+                                    className="text-[13px] font-medium border border-hairline px-4 py-2 rounded-full hover:bg-surface-elevated transition-colors"
+                                >
+                                    Sell
+                                </button>
                             </div>
                         </div>
-                        <div className="text-right shrink-0">
-                            {price === undefined && <Skeleton className="h-7 w-20" />}
-                            {price !== undefined && price !== null && (
-                                <span className="mono text-2xl">${price.toFixed(2)}</span>
-                            )}
-                            {price === null && (
-                                <span className="text-xs text-muted-foreground/60">Price not available</span>
-                            )}
-                        </div>
-                    </div>
-                    <h1 className="display text-4xl md:text-5xl grad-text leading-tight">{company.name}</h1>
-
-                    <div className="flex items-center gap-2 mt-4">
-                        <button
-                            onClick={() => setBuyOpen(true)}
-                            className="bg-primary text-primary-foreground px-5 py-2 rounded-full text-[13px] font-medium glow-primary hover:opacity-90 transition-opacity"
-                        >
-                            Buy
-                        </button>
-                        <button
-                            onClick={() => setSellOpen(true)}
-                            className="border border-hairline px-5 py-2 rounded-full text-[13px] font-medium hover:bg-surface-elevated transition-colors"
-                        >
-                            Sell
-                        </button>
                     </div>
                 </section>
 
+                {/* Tabs */}
                 <nav className="inline-flex gap-1 p-1 rounded-full border border-hairline bg-surface/60">
                     {(["overview", "financials", "filings", "metrics"] as const).map((t) => (
                         <button
@@ -241,20 +220,57 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
                 </nav>
 
                 {tab === "overview" && (
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="card-modern p-5">
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Ticker</p>
-                            <p className="mono text-2xl mt-2">{company.ticker}</p>
-                        </div>
-                        <div className="card-modern p-5">
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">CIK</p>
-                            <p className="mono text-2xl mt-2">{company.cik}</p>
-                        </div>
-                        <div className="card-modern p-5 col-span-2">
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Company name</p>
-                            <p className="mono text-lg mt-2">{company.name}</p>
-                        </div>
-                    </div>
+                    <section className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        {financials?.financials_available ? (
+                            <>
+                                {financials.revenue && (
+                                    <div className="card-modern p-4">
+                                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Revenue</p>
+                                        <p className="mono text-2xl mt-2">{formatFinancialValue(financials.revenue.value, financials.revenue.unit)}</p>
+                                    </div>
+                                )}
+                                {financials.net_income && (
+                                    <div className="card-modern p-4">
+                                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Net Income</p>
+                                        <p className="mono text-2xl mt-2">{formatFinancialValue(financials.net_income.value, financials.net_income.unit)}</p>
+                                    </div>
+                                )}
+                                {financials.eps && (
+                                    <div className="card-modern p-4">
+                                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">EPS</p>
+                                        <p className="mono text-2xl mt-2">{formatFinancialValue(financials.eps.value, financials.eps.unit)}</p>
+                                    </div>
+                                )}
+                                {financials.total_assets && (
+                                    <div className="card-modern p-4">
+                                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Assets</p>
+                                        <p className="mono text-2xl mt-2">{formatFinancialValue(financials.total_assets.value, financials.total_assets.unit)}</p>
+                                    </div>
+                                )}
+                                {financials.total_liabilities && (
+                                    <div className="card-modern p-4">
+                                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Liabilities</p>
+                                        <p className="mono text-2xl mt-2">{formatFinancialValue(financials.total_liabilities.value, financials.total_liabilities.unit)}</p>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <div className="card-modern p-5">
+                                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Ticker</p>
+                                    <p className="mono text-2xl mt-2">{company.ticker}</p>
+                                </div>
+                                <div className="card-modern p-5">
+                                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">CIK</p>
+                                    <p className="mono text-2xl mt-2">{company.cik}</p>
+                                </div>
+                                <div className="card-modern p-5 col-span-2 md:col-span-3">
+                                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Company name</p>
+                                    <p className="mono text-lg mt-2">{company.name}</p>
+                                </div>
+                            </>
+                        )}
+                    </section>
                 )}
 
                 {tab === "financials" && (
@@ -273,11 +289,25 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
                         )}
                         {!loadingFinancials && financials?.financials_available && (
                             <div>
-                                <MetricRow label="Revenue"           metric={financials.revenue} />
-                                <MetricRow label="Net Income"        metric={financials.net_income} />
-                                <MetricRow label="EPS (basic)"       metric={financials.eps} />
-                                <MetricRow label="Total Assets"      metric={financials.total_assets} />
-                                <MetricRow label="Total Liabilities" metric={financials.total_liabilities} />
+                                {[
+                                    { label: "Revenue",           metric: financials.revenue },
+                                    { label: "Net Income",        metric: financials.net_income },
+                                    { label: "EPS (basic)",       metric: financials.eps },
+                                    { label: "Total Assets",      metric: financials.total_assets },
+                                    { label: "Total Liabilities", metric: financials.total_liabilities },
+                                ].map(({ label, metric }) => (
+                                    <div key={label} className="flex items-center justify-between py-3 border-b border-hairline last:border-0">
+                                        <span className="text-sm text-muted-foreground">{label}</span>
+                                        {metric ? (
+                                            <div className="text-right">
+                                                <span className="mono text-sm font-medium">{formatFinancialValue(metric.value, metric.unit)}</span>
+                                                <span className="text-[11px] text-muted-foreground/60 ml-2">{metric.period}</span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground/50 italic">-</span>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </section>

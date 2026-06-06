@@ -11,3 +11,12 @@ class WeakPasswordError(Exception):
 class InvalidCredentialsError(Exception):
     def __init__(self):
         super().__init__("invalid credentials")
+
+class TickerNotFoundError(Exception):
+    pass
+
+class InsufficientSharesError(Exception):
+    pass
+
+class PositionNotFoundError(Exception):
+    pass

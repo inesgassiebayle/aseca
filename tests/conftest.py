@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from app.main import app
 from app.services.auth_service import AuthService
 from app.db.session import get_db
+from app.services.portfolio_service import PortfolioService
 
 
 @pytest.fixture
@@ -42,3 +43,7 @@ def edgar_client():
     app.dependency_overrides[get_edgar_service] = lambda: mock_service
     yield TestClient(app), mock_service
     app.dependency_overrides.clear()
+
+@pytest.fixture
+def portfolio_service(db):
+    return PortfolioService(db)

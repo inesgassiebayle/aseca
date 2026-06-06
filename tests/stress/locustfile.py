@@ -4,9 +4,26 @@ from locust import HttpUser, task, between, TaskSet
 
 
 BASE_URL = "/api/v1/auth"
+BASE_PORTFOLIO = "/api/v1/portfolio"
+BASE_OPERATIONS = "/api/v1/operations"
+EDGAR_URL = "/api/v1/edgar"
+PRICES_URL = "/api/v1/prices"
 
 SHARED_USER_EMAIL = "stress_user@test.com"
 SHARED_USER_PASSWORD = "StressPass123"
+
+STRESS_TICKER = "AAPL"
+
+COMPANIES = [
+    {"ticker": "AAPL", "cik": 320193},
+    {"ticker": "MSFT", "cik": 789019},
+    {"ticker": "GOOGL", "cik": 1652044},
+    {"ticker": "AMZN", "cik": 1018724},
+    {"ticker": "TSLA", "cik": 1318605},
+]
+
+SEARCH_QUERIES = ["Apple", "Microsoft", "Amazon", "Tesla", "AAPL", "MSFT", "corp", "tech"]
+SUPPORTED_METRICS = ["revenue", "net_income", "eps"]
 
 
 class RegisterBehavior(TaskSet):
@@ -23,10 +40,10 @@ class RegisterBehavior(TaskSet):
 class LoginBehavior(TaskSet):
     def on_start(self):
         with self.client.post(
-            f"{BASE_URL}/register",
-            json={"email": SHARED_USER_EMAIL, "password": SHARED_USER_PASSWORD},
-            name="/api/v1/auth/register [setup]",
-            catch_response=True,
+                f"{BASE_URL}/register",
+                json={"email": SHARED_USER_EMAIL, "password": SHARED_USER_PASSWORD},
+                name="/api/v1/auth/register [setup]",
+                catch_response=True,
         ) as resp:
             if resp.status_code in (201, 409):
                 resp.success()
@@ -40,39 +57,7 @@ class LoginBehavior(TaskSet):
         )
 
 
-class RegisterUser(HttpUser):
-    tasks = [RegisterBehavior]
-    wait_time = between(1, 3)
-    weight = 1
-
-
-class LoginUser(HttpUser):
-    tasks = [LoginBehavior]
-    wait_time = between(1, 2)
-    weight = 3
-
-
-# ── F-02: Búsqueda y consulta de empresas ────────────────────────────────────
-
-EDGAR_URL = "/api/v1/edgar"
-PRICES_URL = "/api/v1/prices"
-
-# Well-known tickers / CIKs used as a stable fixture set across all behaviors.
-COMPANIES = [
-    {"ticker": "AAPL", "cik": 320193},
-    {"ticker": "MSFT", "cik": 789019},
-    {"ticker": "GOOGL", "cik": 1652044},
-    {"ticker": "AMZN", "cik": 1018724},
-    {"ticker": "TSLA", "cik": 1318605},
-]
-
-SEARCH_QUERIES = ["Apple", "Microsoft", "Amazon", "Tesla", "AAPL", "MSFT", "corp", "tech"]
-SUPPORTED_METRICS = ["revenue", "net_income", "eps"]
-
-
 class SearchBehavior(TaskSet):
-    """US-03 — Buscar empresa por nombre o ticker."""
-
     @task
     def search_by_name(self):
         q = random.choice(SEARCH_QUERIES)
@@ -84,7 +69,6 @@ class SearchBehavior(TaskSet):
 
     @task(2)
     def search_same_query_cached(self):
-        # Repeated identical query — should be served from the in-process cache.
         self.client.get(
             f"{EDGAR_URL}/search",
             params={"q": "Apple"},
@@ -93,8 +77,6 @@ class SearchBehavior(TaskSet):
 
 
 class FinancialsBehavior(TaskSet):
-    """US-04 — Ver datos financieros de una empresa."""
-
     @task
     def get_financials(self):
         company = random.choice(COMPANIES)
@@ -106,7 +88,6 @@ class FinancialsBehavior(TaskSet):
 
     @task(3)
     def get_financials_cached(self):
-        # Same CIK repeated — validates that cache absorbs EDGAR upstream calls.
         self.client.get(
             f"{EDGAR_URL}/company/320193/financials",
             params={"ticker": "AAPL"},
@@ -115,8 +96,6 @@ class FinancialsBehavior(TaskSet):
 
 
 class FilingsBehavior(TaskSet):
-    """US-05 — Ver filings recientes de una empresa."""
-
     @task
     def get_filings(self):
         company = random.choice(COMPANIES)
@@ -134,8 +113,6 @@ class FilingsBehavior(TaskSet):
 
 
 class MetricsBehavior(TaskSet):
-    """US-06 — Ver evolución histórica de métricas."""
-
     @task
     def get_metric_history(self):
         company = random.choice(COMPANIES)
@@ -156,8 +133,6 @@ class MetricsBehavior(TaskSet):
 
 
 class PricesBehavior(TaskSet):
-    """US-07 — Consulta de precios almacenados."""
-
     @task
     def get_ticker_price(self):
         ticker = random.choice([c["ticker"] for c in COMPANIES])
@@ -174,9 +149,99 @@ class PricesBehavior(TaskSet):
         )
 
 
+class PortfolioBehavior(TaskSet):
+    token: str = None
+
+    def on_start(self):
+        email = f"stress_{uuid.uuid4().hex[:8]}@test.com"
+        password = "StressPass123"
+
+        with self.client.post(
+                f"{BASE_URL}/register",
+                json={"email": email, "password": password},
+                name="/api/v1/auth/register [setup]",
+                catch_response=True,
+        ) as resp:
+            if resp.status_code in (201, 409):
+                resp.success()
+
+        resp = self.client.post(
+            f"{BASE_URL}/login",
+            json={"email": email, "password": password},
+            name="/api/v1/auth/login [setup]",
+        )
+        if resp.status_code == 200:
+            self.token = resp.json().get("access_token")
+
+    def auth_headers(self):
+        return {"Authorization": f"Bearer {self.token}"}
+
+    @task(3)
+    def get_portfolio(self):
+        self.client.get(
+            f"{BASE_PORTFOLIO}/",
+            headers=self.auth_headers(),
+            name="/api/v1/portfolio/ [GET]",
+        )
+
+    @task(2)
+    def buy_shares(self):
+        with self.client.post(
+                f"{BASE_PORTFOLIO}/buy",
+                json={"ticker": STRESS_TICKER, "quantity": 1},
+                headers=self.auth_headers(),
+                name="/api/v1/portfolio/buy [POST]",
+                catch_response=True,
+        ) as resp:
+            if resp.status_code in (201, 422):
+                resp.success()
+
+    @task(1)
+    def sell_shares(self):
+        with self.client.post(
+                f"{BASE_PORTFOLIO}/sell",
+                json={"ticker": STRESS_TICKER, "quantity": 1},
+                headers=self.auth_headers(),
+                name="/api/v1/portfolio/sell [POST]",
+                catch_response=True,
+        ) as resp:
+            if resp.status_code in (201, 422):
+                resp.success()
+
+    @task(2)
+    def get_operations(self):
+        self.client.get(
+            f"{BASE_OPERATIONS}/",
+            headers=self.auth_headers(),
+            name="/api/v1/operations/ [GET]",
+        )
+
+    @task(1)
+    def get_position_detail(self):
+        with self.client.get(
+                f"{BASE_PORTFOLIO}/{STRESS_TICKER}",
+                headers=self.auth_headers(),
+                name="/api/v1/portfolio/{ticker} [GET]",
+                catch_response=True,
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+
+
+class RegisterUser(HttpUser):
+    tasks = [RegisterBehavior]
+    wait_time = between(1, 3)
+    weight = 1
+
+
+class LoginUser(HttpUser):
+    tasks = [LoginBehavior]
+    wait_time = between(1, 2)
+    weight = 3
+
+
 class SearchUser(HttpUser):
     tasks = [SearchBehavior]
-    # Slower cadence: search hits EDGAR upstream on cache miss.
     wait_time = between(2, 4)
     weight = 3
 
@@ -201,6 +266,11 @@ class MetricsUser(HttpUser):
 
 class PricesUser(HttpUser):
     tasks = [PricesBehavior]
-    # Prices come from the DB, no upstream rate-limit concern.
     wait_time = between(1, 2)
     weight = 2
+
+
+class PortfolioUser(HttpUser):
+    tasks = [PortfolioBehavior]
+    wait_time = between(1, 2)
+    weight = 5

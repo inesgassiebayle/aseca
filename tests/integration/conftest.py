@@ -47,6 +47,10 @@ def api_server():
 def clean_db(api_server):
     engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
     with engine.connect() as conn:
+        conn.execute(text("DELETE FROM operations"))
+        conn.execute(text("DELETE FROM positions"))
+        conn.execute(text("DELETE FROM watchlist"))
+        conn.execute(text("DELETE FROM stock_prices"))
         conn.execute(text("DELETE FROM users"))
         conn.commit()
     engine.dispose()

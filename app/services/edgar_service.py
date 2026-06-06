@@ -72,11 +72,11 @@ class TtlKeyedCache:
 
 class EdgarService:
     def __init__(
-        self,
-        http_client: httpx.Client,
-        cache: Optional[TtlCache] = None,
-        filings_cache: Optional[TtlKeyedCache] = None,
-        metrics_cache: Optional[TtlKeyedCache] = None,
+            self,
+            http_client: httpx.Client,
+            cache: Optional[TtlCache] = None,
+            filings_cache: Optional[TtlKeyedCache] = None,
+            metrics_cache: Optional[TtlKeyedCache] = None,
     ):
         self.http_client   = http_client
         self.cache         = cache         if cache         is not None else TtlCache()
@@ -100,6 +100,21 @@ class EdgarService:
 
         return results
 
+    def get_company(self, ticker: str) -> dict | None:
+        data = self._get_tickers()
+        ticker_upper = ticker.upper()
+
+        for entry in data.values():
+            if entry["ticker"].upper() == ticker_upper:
+                return {
+                    "ticker": entry["ticker"],
+                    "name": entry["title"],
+                    "cik": str(entry["cik_str"]).zfill(10),
+                    "price": None,
+                    "updated_at": None,
+                }
+        return None
+
     def get_filings(self, cik: int) -> list:
         key = str(cik)
         cached = self.filings_cache.get(key)
@@ -114,10 +129,10 @@ class EdgarService:
 
         filings = []
         for form, date, accession, document in zip(
-            recent["form"],
-            recent["filingDate"],
-            recent["accessionNumber"],
-            recent["primaryDocument"],
+                recent["form"],
+                recent["filingDate"],
+                recent["accessionNumber"],
+                recent["primaryDocument"],
         ):
             if form not in ALLOWED_FORMS:
                 continue
@@ -132,10 +147,10 @@ class EdgarService:
         return filings
 
     def get_metric_history(
-        self,
-        cik: int,
-        metric: str,
-        quarters: int = 8,
+            self,
+            cik: int,
+            metric: str,
+            quarters: int = 8,
     ) -> dict:
         if metric not in SUPPORTED_METRICS:
             raise ValueError(
@@ -184,7 +199,7 @@ class EdgarService:
                         "form":       entry["form"],
                         "filed":      entry.get("filed", ""),
                     })
-            break  # primer concepto encontrado gana
+            break
 
         seen = {}
         for entry in entries:

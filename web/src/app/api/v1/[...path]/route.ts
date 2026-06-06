@@ -7,8 +7,12 @@ async function proxy(request: NextRequest, path: string[]) {
   const url = `${API_URL}/api/v1/${path.join("/")}${qs ? `?${qs}` : ""}`;
   const res = await fetch(url, {
     method: request.method,
-    headers: { "Content-Type": "application/json" },
-    body: request.method !== "GET" ? await request.text() : undefined,
+      headers: {
+          "Content-Type": "application/json",
+          Authorization: request.headers.get("Authorization") ?? "",
+      },
+      body: request.method !== "GET" ? await request.text() : undefined,
+      redirect: "follow",
   });
   const data = await res.json().catch(() => ({}));
   return NextResponse.json(data, { status: res.status });

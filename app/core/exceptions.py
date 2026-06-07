@@ -23,3 +23,6 @@ class PositionNotFoundError(Exception):
 
 class TickerAlreadyInWatchlistError(Exception):
     pass
+
+class TickerNotInWhitelistError(Exception):
+    pass

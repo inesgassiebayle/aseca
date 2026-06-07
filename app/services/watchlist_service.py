@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
+from app.core.whitelist import TICKER_WHITELIST
 from app.models.models import WatchlistItem
-from app.core.exceptions import TickerAlreadyInWatchlistError
+from app.core.exceptions import TickerAlreadyInWatchlistError, TickerNotInWhitelistError
 
 
 class WatchlistService:
@@ -9,6 +10,10 @@ class WatchlistService:
 
     def add(self, user_id: int, ticker: str) -> WatchlistItem:
         ticker = ticker.upper()
+
+        if ticker not in TICKER_WHITELIST:
+            raise TickerNotInWhitelistError(f"{ticker} no pertenece a la lista blanca")
+
         existing = self.db.query(WatchlistItem).filter(
             WatchlistItem.user_id == user_id,
             WatchlistItem.ticker == ticker,
@@ -22,3 +27,8 @@ class WatchlistService:
         self.db.commit()
         self.db.refresh(item)
         return item
+
+    def get(self, user_id: int) -> list[WatchlistItem]:
+        return self.db.query(WatchlistItem).filter(
+            WatchlistItem.user_id == user_id
+        ).all()

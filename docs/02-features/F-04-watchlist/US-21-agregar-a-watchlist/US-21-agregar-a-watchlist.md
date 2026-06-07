@@ -7,3 +7,4 @@
 - Se puede agregar por ticker.
 - No se puede agregar el mismo ticker dos veces.
 - Si el ticker pertenece a la lista blanca del sistema, su precio estará disponible en la watchlist tras el próximo batch.
+- Solo se pueden agregar tickers pertenecientes a la lista blanca del sistema (S&P 500).

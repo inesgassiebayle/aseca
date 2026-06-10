@@ -1,6 +1,6 @@
 const MOCK_WATCHLIST = [
-    { id: 1, ticker: "AAPL" },
-    { id: 2, ticker: "TSLA" },
+    { id: 1, ticker: "AAPL", price: 189.5, updated_at: "2025-01-01T12:00:00" },
+    { id: 2, ticker: "TSLA", price: null, updated_at: null },
 ];
 
 const EMPTY_WATCHLIST: never[] = [];
@@ -16,7 +16,7 @@ function interceptAdd(statusCode = 201, ticker = "MSFT") {
     cy.intercept("POST", "/api/v1/watchlist/", {
         statusCode,
         body: statusCode === 201
-            ? { id: 3, ticker }
+            ? { id: 3, ticker, price: null, updated_at: null }
             : { detail: statusCode === 409 ? `${ticker} ya está en la watchlist` : `${ticker} no pertenece a la lista blanca` },
     }).as("addWatchlist");
 }
@@ -52,7 +52,7 @@ describe("US-21 — Agregar empresa a la watchlist", () => {
 
     it("agrega un ticker nuevo exitosamente", () => {
         interceptAdd(201, "MSFT");
-        interceptWatchlist([...MOCK_WATCHLIST, { id: 3, ticker: "MSFT" }]);
+        interceptWatchlist([...MOCK_WATCHLIST, { id: 3, ticker: "MSFT", price: null, updated_at: null }]);
 
         cy.get("[data-testid='watchlist-input']").type("MSFT");
         cy.get("[data-testid='watchlist-add-btn']").click();
@@ -115,12 +115,53 @@ describe("US-22 — Eliminar empresa de la watchlist", () => {
             statusCode: 200,
             body: { message: "AAPL eliminado de tu watchlist" },
         }).as("deleteWatchlist");
-        interceptWatchlist([{ id: 2, ticker: "TSLA" }]);
+        interceptWatchlist([{ id: 2, ticker: "TSLA", price: null, updated_at: null }]);
 
         cy.get("[data-testid='watchlist-remove-AAPL']").click();
 
         cy.wait("@deleteWatchlist");
         cy.wait("@getWatchlist");
         cy.contains("AAPL").should("not.exist");
+    });
+});
+
+// US-23 — Ver watchlist con precios actuales
+describe("US-23 — Ver watchlist con precios actuales", () => {
+    beforeEach(() => {
+        cy.login();
+        interceptWatchlist(MOCK_WATCHLIST);
+        cy.visit("/watchlist");
+        cy.wait("@getWatchlist");
+    });
+
+    it("muestra el precio cuando está disponible", () => {
+        cy.get("[data-testid='watchlist-price-AAPL']")
+            .should("be.visible")
+            .and("contain", "189.50");
+    });
+
+    it("muestra N/A cuando no hay precio", () => {
+        cy.get("[data-testid='watchlist-price-TSLA']")
+            .should("be.visible")
+            .and("contain", "N/A");
+    });
+
+    it("muestra la fecha de actualización cuando hay precio", () => {
+        cy.get("[data-testid='watchlist-item-AAPL']")
+            .find("[data-testid='watchlist-updated-at-AAPL']")
+            .should("be.visible")
+            .and("not.be.empty");
+    });
+
+    it("no muestra fecha cuando no hay precio", () => {
+        cy.get("[data-testid='watchlist-updated-at-TSLA']")
+            .should("contain", "—");
+    });
+
+    it("watchlist vacía sigue mostrando mensaje", () => {
+        interceptWatchlist([]);
+        cy.visit("/watchlist");
+        cy.wait("@getWatchlist");
+        cy.contains("Tu watchlist está vacía").should("be.visible");
     });
 });

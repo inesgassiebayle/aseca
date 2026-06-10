@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 type WatchlistItem = {
     id: number;
     ticker: string;
+    price: number | null;
+    updated_at: string | null;
 };
 
 export default function WatchlistPage() {
@@ -146,8 +148,10 @@ export default function WatchlistPage() {
             )}
 
             <div className="card-modern overflow-hidden">
-                <div className="hidden md:grid grid-cols-[1fr] gap-4 px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-hairline">
+                <div className="hidden md:grid grid-cols-[1fr_auto_auto] gap-4 px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-hairline">
                     <span>Asset</span>
+                    <span>Last updated</span>
+                    <span>Price</span>
                 </div>
 
                 {items.length === 0 && (
@@ -166,6 +170,20 @@ export default function WatchlistPage() {
                             {item.ticker.slice(0, 2)}
                         </div>
                         <span className="text-sm font-medium flex-1">{item.ticker}</span>
+                        <span
+                            data-testid={`watchlist-updated-at-${item.ticker}`}
+                            className="text-[11px] text-muted-foreground mono w-36 text-right"
+                        >
+                            {item.updated_at
+                                ? new Date(item.updated_at).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })
+                                : "—"}
+                        </span>
+                        <span
+                            data-testid={`watchlist-price-${item.ticker}`}
+                            className={`text-sm mono w-20 text-right font-medium ${item.price === null ? "text-muted-foreground" : ""}`}
+                        >
+                            {item.price !== null ? `$${item.price.toFixed(2)}` : "N/A"}
+                        </span>
                         <button
                             data-testid={`watchlist-remove-${item.ticker}`}
                             onClick={() => handleRemove(item.ticker)}

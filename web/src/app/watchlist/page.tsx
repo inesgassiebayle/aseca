@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 type WatchlistItem = {
     id: number;
@@ -100,9 +101,17 @@ export default function WatchlistPage() {
 
     return (
         <main className="min-h-screen p-6 md:p-12 space-y-8">
-            <header>
-                <div className="chip mb-3">Watchlist</div>
-                <h1 className="display text-5xl md:text-6xl grad-text">My watchlist</h1>
+            <header className="flex items-start justify-between">
+                <div>
+                    <div className="chip mb-3">Watchlist</div>
+                    <h1 className="display text-5xl md:text-6xl grad-text">My watchlist</h1>
+                </div>
+                <Link
+                    href="/watchlist/compare"
+                    className="text-[11px] uppercase tracking-wider px-4 py-2 rounded-full border border-hairline hover:bg-surface-elevated transition-colors mt-2"
+                >
+                    Compare →
+                </Link>
             </header>
 
             <div className="relative max-w-sm">

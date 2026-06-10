@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app.core.whitelist import TICKER_WHITELIST
 from app.models.models import WatchlistItem
 from app.core.exceptions import TickerAlreadyInWatchlistError, TickerNotInWhitelistError, WatchlistItemNotFoundError
+from app.models.models import WatchlistItem, StockPrice
 
 class WatchlistService:
     def __init__(self, db: Session):
@@ -44,3 +45,20 @@ class WatchlistService:
 
         self.db.delete(item)
         self.db.commit()
+
+    def get_with_prices(self, user_id: int) -> list[dict]:
+        rows = (
+            self.db.query(WatchlistItem, StockPrice)
+            .outerjoin(StockPrice, WatchlistItem.ticker == StockPrice.ticker)
+            .filter(WatchlistItem.user_id == user_id)
+            .all()
+        )
+        return [
+            {
+                "id": item.id,
+                "ticker": item.ticker,
+                "price": stock.price if stock else None,
+                "updated_at": stock.updated_at if stock else None,
+            }
+            for item, stock in rows
+        ]

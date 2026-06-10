@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from app.core.whitelist import TICKER_WHITELIST
 
 from app.core.dependencies import get_db, get_current_user
 from app.models.models import User
 from app.services.watchlist_service import WatchlistService
-from app.core.exceptions import TickerAlreadyInWatchlistError, TickerNotInWhitelistError
+from app.core.exceptions import TickerAlreadyInWatchlistError, TickerNotInWhitelistError, WatchlistItemNotFoundError
 
 router = APIRouter()
 
@@ -46,3 +47,20 @@ def get_watchlist(
     service: WatchlistService = Depends(get_watchlist_service),
 ):
     return service.get(user_id=current_user.id)
+
+@router.delete("/{ticker}", status_code=200)
+def remove_from_watchlist(
+    ticker: str,
+    current_user: User = Depends(get_current_user),
+    service: WatchlistService = Depends(get_watchlist_service),
+):
+    try:
+        service.remove(user_id=current_user.id, ticker=ticker)
+        return {"message": f"{ticker.upper()} eliminado de tu watchlist"}
+    except WatchlistItemNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/whitelist")
+def get_whitelist():
+    return TICKER_WHITELIST

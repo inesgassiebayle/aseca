@@ -26,3 +26,6 @@ class TickerAlreadyInWatchlistError(Exception):
 
 class TickerNotInWhitelistError(Exception):
     pass
+
+class WatchlistItemNotFoundError(Exception):
+    pass

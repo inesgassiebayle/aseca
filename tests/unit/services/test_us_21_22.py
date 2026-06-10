@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.models import WatchlistItem
 from app.services.watchlist_service import WatchlistService
 from app.core.exceptions import TickerAlreadyInWatchlistError
+from app.core.exceptions import WatchlistItemNotFoundError
 
 
 @pytest.fixture
@@ -89,3 +90,28 @@ class TestValidacionWhitelist:
         result = service.add(user_id=1, ticker="AAPL")
 
         db.add.assert_called_once()
+
+class TestEliminarDeWatchlist:
+    def test_elimina_ticker_existente(self, service, db):
+        db.query.return_value.filter.return_value.first.return_value = WatchlistItem(
+            id=1, user_id=1, ticker="TSLA"
+        )
+
+        service.remove(user_id=1, ticker="TSLA")
+
+        db.delete.assert_called_once()
+        db.commit.assert_called_once()
+
+    def test_ticker_inexistente_lanza_error(self, service, db):
+        db.query.return_value.filter.return_value.first.return_value = None
+
+        with pytest.raises(WatchlistItemNotFoundError):
+            service.remove(user_id=1, ticker="XYZ")
+
+    def test_ticker_inexistente_no_hace_commit(self, service, db):
+        db.query.return_value.filter.return_value.first.return_value = None
+
+        with pytest.raises(WatchlistItemNotFoundError):
+            service.remove(user_id=1, ticker="XYZ")
+
+        db.commit.assert_not_called()

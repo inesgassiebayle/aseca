@@ -94,3 +94,33 @@ describe("US-21 — Agregar empresa a la watchlist", () => {
         cy.wait("@addWatchlist").its("request.body.ticker").should("eq", "MSFT");
     });
 });
+
+// US-22 — Eliminar empresa de la watchlist
+describe("US-22 — Eliminar empresa de la watchlist", () => {
+    beforeEach(() => {
+        cy.login();
+        interceptWatchlist(MOCK_WATCHLIST);
+        cy.visit("/watchlist");
+        cy.wait("@getWatchlist");
+    });
+
+    it("muestra botón de eliminar en cada item", () => {
+        cy.get("[data-testid='watchlist-item-AAPL']")
+            .find("[data-testid='watchlist-remove-AAPL']")
+            .should("be.visible");
+    });
+
+    it("elimina ticker exitosamente", () => {
+        cy.intercept("DELETE", "/api/v1/watchlist/AAPL", {
+            statusCode: 200,
+            body: { message: "AAPL eliminado de tu watchlist" },
+        }).as("deleteWatchlist");
+        interceptWatchlist([{ id: 2, ticker: "TSLA" }]);
+
+        cy.get("[data-testid='watchlist-remove-AAPL']").click();
+
+        cy.wait("@deleteWatchlist");
+        cy.wait("@getWatchlist");
+        cy.contains("AAPL").should("not.exist");
+    });
+});

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 type MetricItem = {
     ticker: string;
@@ -29,8 +30,22 @@ type HistoryItem = {
 const METRICS = ["revenue", "net_income", "eps"] as const;
 type Metric = typeof METRICS[number];
 
+const METRIC_LABELS: Record<Metric, string> = {
+    revenue: "Revenue",
+    net_income: "Net Income",
+    eps: "EPS",
+};
+
+const METRIC_ROW_LABELS: Record<string, string> = {
+    revenue: "Revenue",
+    net_income: "Net Income",
+    eps: "EPS",
+    total_assets: "Total Assets",
+    total_liabilities: "Total Liabilities",
+};
+
 function fmt(value: number | null): string {
-    if (value === null) return "N/A";
+    if (value === null) return "—";
     if (Math.abs(value) >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`;
     if (Math.abs(value) >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`;
     return `$${value.toFixed(2)}`;
@@ -71,7 +86,7 @@ export default function ComparePage() {
             if (!res.ok) throw new Error();
             setCompareData(await res.json());
         } catch {
-            setError("No se pudieron obtener las métricas.");
+            setError("Could not load metrics.");
         } finally {
             setLoadingCompare(false);
         }
@@ -90,7 +105,7 @@ export default function ComparePage() {
             if (!res.ok) throw new Error();
             setHistoryData(await res.json());
         } catch {
-            setError("No se pudo obtener la evolución histórica.");
+            setError("Could not load history.");
         } finally {
             setLoadingHistory(false);
         }
@@ -98,13 +113,21 @@ export default function ComparePage() {
 
     return (
         <main className="min-h-screen p-6 md:p-12 space-y-8">
-            <header>
-                <div className="chip mb-3">Watchlist</div>
-                <h1 className="display text-5xl md:text-6xl grad-text">Compare</h1>
+            <header className="flex items-start justify-between">
+                <div>
+                    <div className="chip mb-3">Watchlist</div>
+                    <h1 className="display text-5xl md:text-6xl grad-text">Compare</h1>
+                </div>
+                <Link
+                    href="/watchlist"
+                    className="text-[11px] uppercase tracking-wider px-4 py-2 rounded-full border border-hairline hover:bg-surface-elevated transition-colors mt-2"
+                >
+                    ← My watchlist
+                </Link>
             </header>
 
             <section className="space-y-3">
-                <p className="text-sm text-muted-foreground">Seleccioná las empresas a comparar:</p>
+                <p className="text-sm text-muted-foreground">Select companies to compare:</p>
                 <div data-testid="ticker-selector" className="flex flex-wrap gap-2">
                     {watchlist.map(t => (
                         <button
@@ -132,7 +155,7 @@ export default function ComparePage() {
                     disabled={selected.length < 1 || loadingCompare}
                     className="text-[11px] uppercase tracking-wider px-4 py-2 rounded-full border border-hairline hover:bg-surface-elevated transition-colors disabled:opacity-50"
                 >
-                    {loadingCompare ? "Cargando..." : "Comparar métricas"}
+                    {loadingCompare ? "Loading..." : "Compare metrics"}
                 </button>
 
                 {compareData && (
@@ -140,23 +163,33 @@ export default function ComparePage() {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-hairline text-[10px] uppercase tracking-wider text-muted-foreground">
-                                    <th className="px-5 py-3 text-left">Métrica</th>
+                                    <th className="px-5 py-3 text-left">Metric</th>
                                     {compareData.map(c => (
-                                        <th key={c.ticker} className="px-5 py-3 text-right mono">{c.ticker}</th>
+                                        <th key={c.ticker} className="px-5 py-3 text-right mono">
+                                            <div>{c.ticker}</div>
+                                            {!c.financials_available && (
+                                                <div className="text-[10px] text-negative font-normal normal-case tracking-normal mt-0.5">
+                                                    No EDGAR data
+                                                </div>
+                                            )}
+                                        </th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
                                 {(["revenue", "net_income", "eps", "total_assets", "total_liabilities"] as const).map(metric => (
                                     <tr key={metric} className="border-b border-hairline last:border-0">
-                                        <td className="px-5 py-3 text-muted-foreground capitalize">{metric.replace("_", " ")}</td>
+                                        <td className="px-5 py-3 text-muted-foreground">{METRIC_ROW_LABELS[metric]}</td>
                                         {compareData.map(c => (
                                             <td
                                                 key={c.ticker}
                                                 data-testid={`metric-${metric}-${c.ticker}`}
                                                 className="px-5 py-3 text-right mono"
                                             >
-                                                {c.financials_available ? fmt(c[metric as keyof MetricItem] as number | null) : "No disponible"}
+                                                {c.financials_available
+                                                    ? fmt(c[metric as keyof MetricItem] as number | null)
+                                                    : <span className="text-muted-foreground text-[11px]">No EDGAR data</span>
+                                                }
                                             </td>
                                         ))}
                                     </tr>
@@ -169,7 +202,7 @@ export default function ComparePage() {
 
             <section className="space-y-4">
                 <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-sm text-muted-foreground">Métrica:</span>
+                    <span className="text-sm text-muted-foreground">Metric:</span>
                     {METRICS.map(m => (
                         <button
                             key={m}
@@ -181,7 +214,7 @@ export default function ComparePage() {
                                     : "border-hairline hover:bg-surface-elevated"
                             }`}
                         >
-                            {m.replace("_", " ")}
+                            {METRIC_LABELS[m]}
                         </button>
                     ))}
                     <button
@@ -190,7 +223,7 @@ export default function ComparePage() {
                         disabled={selected.length < 1 || loadingHistory}
                         className="text-[11px] uppercase tracking-wider px-4 py-2 rounded-full border border-hairline hover:bg-surface-elevated transition-colors disabled:opacity-50"
                     >
-                        {loadingHistory ? "Cargando..." : "Ver evolución"}
+                        {loadingHistory ? "Loading..." : "View history"}
                     </button>
                 </div>
 
@@ -201,7 +234,14 @@ export default function ComparePage() {
                                 <tr className="border-b border-hairline text-[10px] uppercase tracking-wider text-muted-foreground">
                                     <th className="px-5 py-3 text-left">Quarter</th>
                                     {historyData.map(h => (
-                                        <th key={h.ticker} className="px-5 py-3 text-right mono">{h.ticker}</th>
+                                        <th key={h.ticker} className="px-5 py-3 text-right mono">
+                                            <div>{h.ticker}</div>
+                                            {h.quarters_available === 0 && (
+                                                <div className="text-[10px] text-negative font-normal normal-case tracking-normal mt-0.5">
+                                                    No data
+                                                </div>
+                                            )}
+                                        </th>
                                     ))}
                                 </tr>
                             </thead>
@@ -225,12 +265,19 @@ export default function ComparePage() {
                                         })}
                                     </tr>
                                 ))}
+                                {historyData.every(h => h.quarters_available === 0) && (
+                                    <tr>
+                                        <td colSpan={historyData.length + 1} className="px-5 py-8 text-center text-muted-foreground text-sm">
+                                            No historical data available for the selected companies.
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                         <div className="px-5 py-3 border-t border-hairline text-[11px] text-muted-foreground">
                             {historyData.map(h => (
                                 <span key={h.ticker} data-testid={`quarters-available-${h.ticker}`} className="mr-4">
-                                    {h.ticker}: {h.quarters_available} quarters
+                                    {h.ticker}: {h.quarters_available} quarters available
                                 </span>
                             ))}
                         </div>

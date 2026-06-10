@@ -99,13 +99,13 @@ describe("US-24 — Comparar métricas", () => {
         cy.get("[data-testid='metric-revenue-AAPL']").should("contain", "100.00B");
     });
 
-    it("muestra No disponible para empresa sin datos EDGAR", () => {
-        interceptCompare();
-        cy.get("[data-testid='ticker-btn-AAPL']").click();
-        cy.get("[data-testid='ticker-btn-MSFT']").click();
-        cy.get("[data-testid='compare-btn']").click();
-        cy.wait("@getCompare");
-        cy.get("[data-testid='metric-revenue-MSFT']").should("contain", "No disponible");
+   it("muestra No disponible para empresa sin datos EDGAR", () => {
+    interceptCompare();
+    cy.get("[data-testid='ticker-btn-AAPL']").click();
+    cy.get("[data-testid='ticker-btn-MSFT']").click();
+    cy.get("[data-testid='compare-btn']").click();
+    cy.wait("@getCompare");
+    cy.get("[data-testid='metric-revenue-MSFT']").should("contain", "No EDGAR data");
     });
 });
 

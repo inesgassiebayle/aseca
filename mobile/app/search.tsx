@@ -135,6 +135,15 @@ export default function SearchScreen() {
                 <View style={styles.navDivider} />
                 <TouchableOpacity
                     style={styles.navItem}
+                    onPress={() => router.push("/watchlist")}
+                    testID="nav-watchlist"
+                    accessibilityLabel="nav-watchlist"
+                >
+                    <Text style={styles.navText}>⭐ Watchlist</Text>
+                </TouchableOpacity>
+                <View style={styles.navDivider} />
+                <TouchableOpacity
+                    style={styles.navItem}
                     onPress={() => router.push("/operations")}
                     testID="nav-activity"
                     accessibilityLabel="nav-activity"

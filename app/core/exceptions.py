@@ -20,3 +20,12 @@ class InsufficientSharesError(Exception):
 
 class PositionNotFoundError(Exception):
     pass
+
+class TickerAlreadyInWatchlistError(Exception):
+    pass
+
+class TickerNotInWhitelistError(Exception):
+    pass
+
+class WatchlistItemNotFoundError(Exception):
+    pass

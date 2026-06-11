@@ -39,7 +39,7 @@ class PositionResponse(BaseModel):
     id: int
     ticker: str
     quantity: float
-    avg_price: float
+    historical_cost: float
     current_price: Optional[float] = None
     current_value: Optional[float] = None
     price_updated_at: Optional[datetime] = None

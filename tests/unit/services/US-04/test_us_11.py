@@ -14,7 +14,7 @@ class TestVerPortfolioService:
         assert result == []
 
     def test_portfolio_con_precio(self, portfolio_service, db):
-        position = Position(id=1, user_id=1, ticker="AAPL", quantity=10, avg_price=168.42)
+        position = Position(id=1, user_id=1, ticker="AAPL", quantity=10, historical_cost=1684.2)
         price = StockPrice(ticker="AAPL", price=214.30, updated_at=datetime.now(timezone.utc))
 
         db.query.return_value.filter.return_value.all.return_value = [position]
@@ -28,7 +28,7 @@ class TestVerPortfolioService:
         assert result[0]["current_value"] == 2143.0
 
     def test_portfolio_sin_precio_almacenado(self, portfolio_service, db):
-        position = Position(id=1, user_id=1, ticker="XYZ", quantity=5, avg_price=100.0)
+        position = Position(id=1, user_id=1, ticker="XYZ", quantity=5, historical_cost=500.0)
 
         db.query.return_value.filter.return_value.all.return_value = [position]
         db.query.return_value.filter.return_value.first.return_value = None
@@ -39,7 +39,7 @@ class TestVerPortfolioService:
         assert result[0]["current_value"] is None
 
     def test_portfolio_calcula_pnl_positivo(self, portfolio_service, db):
-        position = Position(id=1, user_id=1, ticker="AAPL", quantity=10, avg_price=150.0)
+        position = Position(id=1, user_id=1, ticker="AAPL", quantity=10, historical_cost=1500.0)
         price = StockPrice(ticker="AAPL", price=180.0, updated_at=datetime.now(timezone.utc))
 
         db.query.return_value.filter.return_value.all.return_value = [position]
@@ -51,7 +51,7 @@ class TestVerPortfolioService:
         assert result[0]["pnl_pct"] == 20.0
 
     def test_portfolio_calcula_pnl_negativo(self, portfolio_service, db):
-        position = Position(id=1, user_id=1, ticker="MSFT", quantity=5, avg_price=420.0)
+        position = Position(id=1, user_id=1, ticker="MSFT", quantity=5, historical_cost=2100.0)
         price = StockPrice(ticker="MSFT", price=390.0, updated_at=datetime.now(timezone.utc))
 
         db.query.return_value.filter.return_value.all.return_value = [position]
@@ -63,7 +63,7 @@ class TestVerPortfolioService:
         assert round(result[0]["pnl_pct"], 2) == -7.14
 
     def test_portfolio_sin_precio_pnl_none(self, portfolio_service, db):
-        position = Position(id=1, user_id=1, ticker="XYZ", quantity=5, avg_price=100.0)
+        position = Position(id=1, user_id=1, ticker="XYZ", quantity=5, historical_cost=500.0)
 
         db.query.return_value.filter.return_value.all.return_value = [position]
         db.query.return_value.filter.return_value.first.return_value = None

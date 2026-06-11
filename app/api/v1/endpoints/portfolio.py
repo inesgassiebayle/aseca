@@ -63,7 +63,7 @@ class OperationItemResponse(BaseModel):
 class PositionDetailResponse(BaseModel):
     ticker: str
     quantity: float
-    avg_price: float
+    historical_cost: float
     current_price: Optional[float] = None
     pnl: Optional[float] = None
     operations: list[OperationItemResponse]

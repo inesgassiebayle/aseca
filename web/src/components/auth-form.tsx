@@ -76,20 +76,21 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         <form className="card-modern p-8 w-full max-w-sm space-y-5" onSubmit={handleSubmit}>
           <div>
             <div className="chip mb-3">{mode === "login" ? "Welcome back" : "Get started"}</div>
-            <h1 className="display text-3xl">{mode === "login" ? "Sign in" : "Create account"}</h1>
+            <h1 data-cy="auth-title" className="display text-3xl">{mode === "login" ? "Sign in" : "Create account"}</h1>
           </div>
 
-          <Field label="Email" type="email" placeholder="you@email.com" value={email} onChange={setEmail} />
-          <Field label="Password" type="password" placeholder="••••••••" value={password} onChange={setPassword} />
+          <Field label="Email" type="email" placeholder="you@email.com" value={email} onChange={setEmail} dataCy="email-input" />
+          <Field label="Password" type="password" placeholder="••••••••" value={password} onChange={setPassword} dataCy="password-input" />
           {mode === "register" && (
-            <Field label="Confirm password" type="password" placeholder="••••••••" value={confirmPassword} onChange={setConfirmPassword} />
+            <Field label="Confirm password" type="password" placeholder="••••••••" value={confirmPassword} onChange={setConfirmPassword} dataCy="confirm-password-input" />
           )}
 
           {error && (
-            <p className="text-[13px] text-negative text-center">{error}</p>
+            <p data-cy="form-error" className="text-[13px] text-negative text-center">{error}</p>
           )}
 
           <button
+            data-cy="submit-btn"
             type="submit"
             disabled={loading}
             className="w-full bg-primary text-primary-foreground py-2.5 rounded-full text-[13px] font-medium glow-primary disabled:opacity-50"
@@ -101,9 +102,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
           <p className="text-[13px] text-muted-foreground text-center">
             {mode === "login" ? (
-              <>No account? <Link href="/register" className="text-foreground">Register</Link></>
+              <>No account? <Link data-cy="register-link" href="/register" className="text-foreground">Register</Link></>
             ) : (
-              <>Already registered? <Link href="/login" className="text-foreground">Sign in</Link></>
+              <>Already registered? <Link data-cy="signin-link" href="/login" className="text-foreground">Sign in</Link></>
             )}
           </p>
         </form>
@@ -113,18 +114,20 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 }
 
 function Field({
-  label, type, placeholder, value, onChange,
+  label, type, placeholder, value, onChange, dataCy,
 }: {
   label: string;
   type: string;
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
+  dataCy?: string;
 }) {
   return (
     <label className="block">
       <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
       <input
+        data-cy={dataCy}
         type={type}
         placeholder={placeholder}
         value={value}

@@ -57,19 +57,19 @@ describe("Company page", () => {
   });
 
   it("muestra el tab overview activo por defecto", () => {
-    cy.contains("button", "overview").should("have.class", "bg-foreground");
+    cy.get('[data-cy="tab-overview"]').should("have.attr", "data-active", "true");
   });
 
   it("muestra el tab filings", () => {
-    cy.contains("button", "filings").should("be.visible");
+    cy.get('[data-cy="tab-filings"]').should("be.visible");
   });
 
   it("tiene un botón de vuelta", () => {
-    cy.contains("Back").should("be.visible");
+    cy.get('[data-cy="back-btn"]').should("be.visible");
   });
 
   it("muestra el logo StockWatch con link a home", () => {
-    cy.contains("StockWatch").closest("a").should("have.attr", "href", "/");
+    cy.get('[data-cy="logo"]').should("have.attr", "href", "/");
   });
 });
 
@@ -91,7 +91,7 @@ describe("Company page — precio", () => {
     cy.wait("@searchCompany");
     cy.wait("@getPrice");
 
-    cy.contains("Price not available").should("be.visible");
+    cy.get('[data-cy="price-not-available"]').should("be.visible");
   });
 
   it("llama al endpoint de precio con el ticker correcto", () => {
@@ -152,7 +152,7 @@ describe("Company page — tab Filings", () => {
     interceptFilings();
     cy.visit(`/company/${COMPANY.ticker}`);
     cy.wait("@searchCompany");
-    cy.contains("button", "filings").click();
+    cy.get('[data-cy="tab-filings"]').click();
     cy.wait("@getFilings");
   });
 
@@ -187,8 +187,8 @@ describe("Company page — tab Filings", () => {
   });
 
   it("no llama al endpoint de filings dos veces al cambiar de tab", () => {
-    cy.contains("button", "overview").click();
-    cy.contains("button", "filings").click();
+    cy.get('[data-cy="tab-overview"]').click();
+    cy.get('[data-cy="tab-filings"]').click();
     cy.get("@getFilings.all").should("have.length", 1);
   });
 });
@@ -204,7 +204,7 @@ describe("Company page — sin filings", () => {
 
     cy.visit(`/company/${COMPANY.ticker}`);
     cy.wait("@searchCompany");
-    cy.contains("button", "filings").click();
+    cy.get('[data-cy="tab-filings"]').click();
     cy.wait("@getFilings");
 
     cy.contains("Esta empresa no tiene filings 10-K o 10-Q disponibles.").should("be.visible");
@@ -222,6 +222,6 @@ describe("Company page — empresa no encontrada", () => {
     cy.wait("@search");
 
     cy.contains("XYZFAKE").should("be.visible");
-    cy.contains("Back to search").should("be.visible");
+    cy.get('[data-cy="back-to-search"]').should("be.visible");
   });
 });

@@ -4,15 +4,15 @@ describe("Login page", () => {
   });
 
   it("renders the form with all fields", () => {
-    cy.contains("Sign in").should("be.visible");
-    cy.get('input[type="email"]').should("be.visible");
-    cy.get('input[type="password"]').should("be.visible");
-    cy.get('button[type="submit"]').contains("Sign in").should("be.visible");
+    cy.get('[data-cy="auth-title"]').should("be.visible");
+    cy.get('[data-cy="email-input"]').should("be.visible");
+    cy.get('[data-cy="password-input"]').should("be.visible");
+    cy.get('[data-cy="submit-btn"]').should("be.visible");
   });
 
   it("shows a link to create account", () => {
     cy.contains("No account?").should("be.visible");
-    cy.contains("Register").should("have.attr", "href", "/register");
+    cy.get('[data-cy="register-link"]').should("have.attr", "href", "/register");
   });
 
   it("redirects to home on successful login and stores token", () => {
@@ -21,9 +21,9 @@ describe("Login page", () => {
       body: { access_token: "fake-token", token_type: "bearer" },
     }).as("login");
 
-    cy.get('input[type="email"]').type("usuario@mail.com");
-    cy.get('input[type="password"]').type("Password123!");
-    cy.get('button[type="submit"]').click();
+    cy.get('[data-cy="email-input"]').type("usuario@mail.com");
+    cy.get('[data-cy="password-input"]').type("Password123!");
+    cy.get('[data-cy="submit-btn"]').click();
 
     cy.wait("@login").its("request.body").should("deep.equal", {
       email: "usuario@mail.com",
@@ -40,12 +40,12 @@ describe("Login page", () => {
       body: { detail: "Invalid credentials" },
     }).as("login");
 
-    cy.get('input[type="email"]').type("usuario@mail.com");
-    cy.get('input[type="password"]').type("wrongpassword");
-    cy.get('button[type="submit"]').click();
+    cy.get('[data-cy="email-input"]').type("usuario@mail.com");
+    cy.get('[data-cy="password-input"]').type("wrongpassword");
+    cy.get('[data-cy="submit-btn"]').click();
 
     cy.wait("@login");
-    cy.contains("Invalid credentials").should("be.visible");
+    cy.get('[data-cy="form-error"]').should("contain", "Invalid credentials");
   });
 
   it("disables the button and shows loading state while submitting", () => {
@@ -54,10 +54,10 @@ describe("Login page", () => {
       req.reply({ statusCode: 200, body: { access_token: "fake-token", token_type: "bearer" } });
     }).as("login");
 
-    cy.get('input[type="email"]').type("usuario@mail.com");
-    cy.get('input[type="password"]').type("Password123!");
-    cy.get('button[type="submit"]').click();
+    cy.get('[data-cy="email-input"]').type("usuario@mail.com");
+    cy.get('[data-cy="password-input"]').type("Password123!");
+    cy.get('[data-cy="submit-btn"]').click();
 
-    cy.get('button[type="submit"]').should("be.disabled").and("contain", "Signing in");
+    cy.get('[data-cy="submit-btn"]').should("be.disabled").and("contain", "Signing in");
   });
 });

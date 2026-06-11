@@ -4,25 +4,24 @@ describe("Register page", () => {
   });
 
   it("renders the form with all fields", () => {
-    cy.contains("Create account").should("be.visible");
-    cy.get('input[type="email"]').should("be.visible");
-    cy.get('input[type="password"]').should("have.length", 2);
-    cy.get('button[type="submit"]').contains("Create account").should("be.visible");
+    cy.get('[data-cy="auth-title"]').should("be.visible");
+    cy.get('[data-cy="email-input"]').should("be.visible");
+    cy.get('[data-cy="password-input"]').should("be.visible");
+    cy.get('[data-cy="confirm-password-input"]').should("be.visible");
+    cy.get('[data-cy="submit-btn"]').should("be.visible");
   });
 
   it("shows a link to sign in", () => {
     cy.contains("Already registered?").should("be.visible");
-    cy.contains("Sign in").should("have.attr", "href", "/login");
+    cy.get('[data-cy="signin-link"]').should("have.attr", "href", "/login");
   });
 
-
-
   it("shows error when passwords don't match", () => {
-    cy.get('input[type="email"]').type("test@example.com");
-    cy.get('input[type="password"]').first().type("Password123!");
-    cy.get('input[type="password"]').last().type("Different123!");
-    cy.get('button[type="submit"]').click();
-    cy.contains("Passwords don't match").should("be.visible");
+    cy.get('[data-cy="email-input"]').type("test@example.com");
+    cy.get('[data-cy="password-input"]').type("Password123!");
+    cy.get('[data-cy="confirm-password-input"]').type("Different123!");
+    cy.get('[data-cy="submit-btn"]').click();
+    cy.get('[data-cy="form-error"]').should("contain", "Passwords don't match");
   });
 
   it("logs in and redirects to / on successful registration", () => {
@@ -31,10 +30,10 @@ describe("Register page", () => {
       body: { access_token: "fake-token", token_type: "bearer" },
     }).as("register");
 
-    cy.get('input[type="email"]').type("newuser@example.com");
-    cy.get('input[type="password"]').first().type("Password123!");
-    cy.get('input[type="password"]').last().type("Password123!");
-    cy.get('button[type="submit"]').click();
+    cy.get('[data-cy="email-input"]').type("newuser@example.com");
+    cy.get('[data-cy="password-input"]').type("Password123!");
+    cy.get('[data-cy="confirm-password-input"]').type("Password123!");
+    cy.get('[data-cy="submit-btn"]').click();
 
     cy.wait("@register").its("request.body").should("deep.equal", {
       email: "newuser@example.com",
@@ -51,13 +50,13 @@ describe("Register page", () => {
       body: { detail: "Email already registered" },
     }).as("register");
 
-    cy.get('input[type="email"]').type("existing@example.com");
-    cy.get('input[type="password"]').first().type("Password123!");
-    cy.get('input[type="password"]').last().type("Password123!");
-    cy.get('button[type="submit"]').click();
+    cy.get('[data-cy="email-input"]').type("existing@example.com");
+    cy.get('[data-cy="password-input"]').type("Password123!");
+    cy.get('[data-cy="confirm-password-input"]').type("Password123!");
+    cy.get('[data-cy="submit-btn"]').click();
 
     cy.wait("@register");
-    cy.contains("Email already registered").should("be.visible");
+    cy.get('[data-cy="form-error"]').should("contain", "Email already registered");
   });
 
   it("disables the button and shows loading state while submitting", () => {
@@ -66,11 +65,11 @@ describe("Register page", () => {
       req.reply({ statusCode: 201, body: { access_token: "fake-token", token_type: "bearer" } });
     }).as("register");
 
-    cy.get('input[type="email"]').type("test@example.com");
-    cy.get('input[type="password"]').first().type("Password123!");
-    cy.get('input[type="password"]').last().type("Password123!");
-    cy.get('button[type="submit"]').click();
+    cy.get('[data-cy="email-input"]').type("test@example.com");
+    cy.get('[data-cy="password-input"]').type("Password123!");
+    cy.get('[data-cy="confirm-password-input"]').type("Password123!");
+    cy.get('[data-cy="submit-btn"]').click();
 
-    cy.get('button[type="submit"]').should("be.disabled").and("contain", "Creating account");
+    cy.get('[data-cy="submit-btn"]').should("be.disabled").and("contain", "Creating account");
   });
 });

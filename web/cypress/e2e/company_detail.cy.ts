@@ -50,10 +50,10 @@ describe("US-04 — Company financial detail", () => {
     cy.visit(DETAIL_URL);
     cy.wait("@searchCompany");
 
-    cy.contains("button", "financials").click();
+    cy.get('[data-cy="tab-financials"]').click();
     cy.wait("@getFinancials");
 
-    cy.contains("Financial Data").should("be.visible");
+    cy.get('[data-cy="financial-data-title"]').should("be.visible");
   });
 
   it("shows all five financial metrics", () => {
@@ -63,7 +63,7 @@ describe("US-04 — Company financial detail", () => {
     cy.visit(DETAIL_URL);
     cy.wait("@searchCompany");
 
-    cy.contains("button", "financials").click();
+    cy.get('[data-cy="tab-financials"]').click();
     cy.wait("@getFinancials");
 
     cy.contains("Revenue").should("be.visible");
@@ -80,7 +80,7 @@ describe("US-04 — Company financial detail", () => {
     cy.visit(DETAIL_URL);
     cy.wait("@searchCompany");
 
-    cy.contains("button", "financials").click();
+    cy.get('[data-cy="tab-financials"]').click();
     cy.wait("@getFinancials");
 
     cy.contains("2023-09-30").should("be.visible");
@@ -93,10 +93,10 @@ describe("US-04 — Company financial detail", () => {
     cy.visit(DETAIL_URL);
     cy.wait("@searchCompany");
 
-    cy.contains("button", "financials").click();
+    cy.get('[data-cy="tab-financials"]').click();
     cy.wait("@getFinancials");
 
-    cy.contains("Price not available").should("be.visible");
+    cy.get('[data-cy="price-not-available"]').should("be.visible");
   });
 
   it("shows no XBRL data message when company has no financial data", () => {
@@ -106,10 +106,10 @@ describe("US-04 — Company financial detail", () => {
     cy.visit(DETAIL_URL);
     cy.wait("@searchCompany");
 
-    cy.contains("button", "financials").click();
+    cy.get('[data-cy="tab-financials"]').click();
     cy.wait("@getFinancials");
 
-    cy.contains("No XBRL financial data available").should("be.visible");
+    cy.get('[data-cy="no-xbrl-message"]').should("be.visible");
   });
 
   it("shows cached badge when data comes from cache", () => {
@@ -119,10 +119,10 @@ describe("US-04 — Company financial detail", () => {
     cy.visit(DETAIL_URL);
     cy.wait("@searchCompany");
 
-    cy.contains("button", "financials").click();
+    cy.get('[data-cy="tab-financials"]').click();
     cy.wait("@getFinancials");
 
-    cy.contains("cached").should("be.visible");
+    cy.get('[data-cy="cached-badge"]').should("be.visible");
   });
 
   it("does not call financials API before clicking the tab", () => {
@@ -148,7 +148,7 @@ describe("US-04 — Company financial detail", () => {
     interceptPriceDetail();
 
     cy.visit("/search");
-    cy.get("input").type("Apple{enter}");
+    cy.get('[data-cy="search-input"]').type("Apple{enter}");
     cy.wait("@search");
     cy.contains("AAPL").click();
 

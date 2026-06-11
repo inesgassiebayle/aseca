@@ -86,11 +86,11 @@ describe("US-11 — Ver portfolio", () => {
     });
 
     it("muestra el título My holdings", () => {
-        cy.contains("My holdings").should("be.visible");
+        cy.get('[data-cy="portfolio-title"]').should("be.visible");
     });
 
     it("muestra el valor total del portfolio", () => {
-        cy.contains("Total portfolio value").should("be.visible");
+        cy.get('[data-cy="total-portfolio-value-label"]').should("be.visible");
     });
 
     it("muestra las posiciones con ticker y cantidad", () => {
@@ -106,11 +106,11 @@ describe("US-11 — Ver portfolio", () => {
         interceptPortfolio(EMPTY_POSITIONS);
         cy.visit("/portfolio");
         cy.wait("@getPortfolio");
-        cy.contains("No tenés posiciones todavía").should("be.visible");
+        cy.get('[data-cy="empty-portfolio-message"]').should("be.visible");
     });
 
     it("muestra la fecha de última actualización de precios", () => {
-        cy.contains("Updated").should("be.visible");
+        cy.get('[data-cy="updated-label"]').should("be.visible");
     });
 });
 
@@ -129,8 +129,8 @@ describe("US-19/20 — P&L", () => {
     });
 
     it("muestra P&L total del portfolio", () => {
-        cy.contains("Total portfolio value").should("be.visible");
-        cy.contains("Cost basis").should("be.visible");
+        cy.get('[data-cy="total-portfolio-value-label"]').should("be.visible");
+        cy.get('[data-cy="cost-basis-label"]').should("be.visible");
     });
 });
 
@@ -144,35 +144,35 @@ describe("US-08 — Comprar acciones", () => {
     });
 
     it("muestra el botón New position", () => {
-        cy.contains("+ New position").should("be.visible");
+        cy.get('[data-cy="new-position-btn"]').should("be.visible");
     });
 
     it("abre el dialog de compra al hacer click en New position", () => {
-        cy.contains("+ New position").click();
-        cy.contains("Comprar acciones").should("be.visible");
+        cy.get('[data-cy="new-position-btn"]').click();
+        cy.get('[data-cy="buy-dialog-title"]').should("be.visible");
     });
 
     it("compra exitosa cierra el dialog y recarga el portfolio", () => {
         interceptBuy(201);
         interceptPortfolio(MOCK_POSITIONS);
 
-        cy.contains("+ New position").click();
-        cy.get("input[placeholder='AAPL']").type("AAPL");
-        cy.get("input[placeholder='10']").type("10");
-        cy.contains("Confirmar").click();
+        cy.get('[data-cy="new-position-btn"]').click();
+        cy.get('[data-cy="buy-ticker-input"]').type("AAPL");
+        cy.get('[data-cy="buy-quantity-input"]').type("10");
+        cy.get('[data-cy="confirm-buy-btn"]').click();
 
         cy.wait("@buy");
         cy.wait("@getPortfolio");
-        cy.contains("Comprar acciones").should("not.exist");
+        cy.get('[data-cy="buy-dialog-title"]').should("not.exist");
     });
 
     it("muestra error si el ticker no tiene precio almacenado", () => {
         interceptBuy(422);
 
-        cy.contains("+ New position").click();
-        cy.get("input[placeholder='AAPL']").type("XYZ");
-        cy.get("input[placeholder='10']").type("10");
-        cy.contains("Confirmar").click();
+        cy.get('[data-cy="new-position-btn"]').click();
+        cy.get('[data-cy="buy-ticker-input"]').type("XYZ");
+        cy.get('[data-cy="buy-quantity-input"]').type("10");
+        cy.get('[data-cy="confirm-buy-btn"]').click();
 
         cy.wait("@buy");
         cy.contains("No hay precio almacenado para XYZ").should("be.visible");
@@ -205,7 +205,7 @@ describe("US-10 — Ver historial de operaciones", () => {
     });
 
     it("muestra el título Transactions", () => {
-        cy.contains("Transactions").should("be.visible");
+        cy.get('[data-cy="transactions-title"]').should("be.visible");
     });
 
     it("muestra las operaciones con tipo, ticker y total", () => {
@@ -215,7 +215,7 @@ describe("US-10 — Ver historial de operaciones", () => {
     });
 
     it("muestra el filtro por ticker", () => {
-        cy.get("input[placeholder='Filter by ticker…']").should("be.visible");
+        cy.get('[data-cy="filter-ticker-input"]').should("be.visible");
     });
 
     it("muestra mensaje cuando no hay operaciones", () => {
@@ -225,7 +225,7 @@ describe("US-10 — Ver historial de operaciones", () => {
         }).as("emptyOperations");
         cy.visit("/operations");
         cy.wait("@emptyOperations");
-        cy.contains("No hay operaciones registradas todavía").should("be.visible");
+        cy.get('[data-cy="empty-operations-message"]').should("be.visible");
     });
 });
 
@@ -252,11 +252,11 @@ describe("US-12 — Ver detalle de posición", () => {
     });
 
     it("muestra el historial de operaciones de la posición", () => {
-        cy.contains("Operations").should("be.visible");
+        cy.get('[data-cy="operations-heading"]').should("be.visible");
         cy.contains("BUY").should("be.visible");
     });
 
     it("tiene un link para volver al portfolio", () => {
-        cy.contains("← Portfolio").should("be.visible");
+        cy.get('[data-cy="back-to-portfolio"]').should("be.visible");
     });
 });

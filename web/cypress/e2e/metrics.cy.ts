@@ -65,7 +65,7 @@ function interceptMetric(metric: string, body: object) {
 function visitAndOpenMetrics() {
   cy.visit(`/company/${COMPANY.ticker}`);
   cy.wait("@searchCompany");
-  cy.contains("button", "metrics").click();
+  cy.get('[data-cy="tab-metrics"]').click();
 }
 
 
@@ -79,7 +79,7 @@ describe("Company page - tab Metrics", () => {
   it("shows the metrics tab button", () => {
     cy.visit(`/company/${COMPANY.ticker}`);
     cy.wait("@searchCompany");
-    cy.contains("button", "metrics").should("be.visible");
+    cy.get('[data-cy="tab-metrics"]').should("be.visible");
   });
 
   it("does not call metrics endpoint before opening the tab", () => {
@@ -106,7 +106,7 @@ describe("Company page - tab Metrics", () => {
 
   it("Revenue button is visible by default", () => {
     visitAndOpenMetrics();
-    cy.get("[data-testid='metric-btn-revenue']").should("be.visible");
+    cy.get('[data-cy="metric-btn-revenue"]').should("be.visible");
   });
 });
 
@@ -146,7 +146,7 @@ describe("Company page - Metrics data table", () => {
   });
 
   it("does not show cached badge when cached is false", () => {
-    cy.get("[data-testid='cached-badge']").should("not.exist");
+    cy.get('[data-cy="cached-badge"]').should("not.exist");
   });
 });
 
@@ -191,7 +191,7 @@ describe("Company page - Metrics switching", () => {
     cy.wait("@getMetric_revenue");
     cy.contains("Net Income").click();
     cy.wait("@getMetric_net_income");
-    cy.get("[data-testid='cached-badge']")
+    cy.get('[data-cy="cached-badge"]')
       .should("be.visible")
       .and("contain", "Cached");
   });
@@ -204,7 +204,7 @@ describe("Company page - Metrics empty state", () => {
     interceptMetric("revenue", EMPTY_DATA);
     visitAndOpenMetrics();
     cy.wait("@getMetric_revenue");
-    cy.contains("No historical data available for this metric.").should("be.visible");
+    cy.get('[data-cy="no-metrics-message"]').should("be.visible");
   });
 });
 
@@ -220,7 +220,7 @@ describe("Company page - Metrics isolation", () => {
 
     cy.visit(`/company/${COMPANY.ticker}`);
     cy.wait("@searchCompany");
-    cy.contains("button", "filings").click();
+    cy.get('[data-cy="tab-filings"]').click();
     cy.wait("@getFilings");
     cy.wait(400);
 

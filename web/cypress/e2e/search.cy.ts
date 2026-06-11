@@ -9,19 +9,19 @@ describe("Search page", () => {
   });
 
   it("renders the header and search input", () => {
-    cy.contains("Find a company").should("be.visible");
-    cy.get("input").should("be.visible").and("have.attr", "placeholder", "Search by ticker or company name…");
+    cy.get('[data-cy="search-title"]').should("be.visible");
+    cy.get('[data-cy="search-input"]').should("be.visible").and("have.attr", "placeholder", "Search by ticker or company name…");
   });
 
   it("shows the StockWatch logo linking to home", () => {
-    cy.contains("StockWatch").should("be.visible");
-    cy.contains("StockWatch").closest("a").should("have.attr", "href", "/");
+    cy.get('[data-cy="logo"]').should("be.visible");
+    cy.get('[data-cy="logo"]').should("have.attr", "href", "/");
   });
 
   it("does not fetch the API before pressing Enter", () => {
     cy.intercept("GET", "/api/v1/edgar/search*").as("search");
 
-    cy.get("input").type("apple");
+    cy.get('[data-cy="search-input"]').type("apple");
 
     cy.wait(500);
     cy.get("@search.all").should("have.length", 0);
@@ -33,7 +33,7 @@ describe("Search page", () => {
       body: MOCK_RESULTS,
     }).as("search");
 
-    cy.get("input").type("apple{enter}");
+    cy.get('[data-cy="search-input"]').type("apple{enter}");
 
     cy.wait("@search");
     cy.contains("Apple Inc.").should("be.visible");
@@ -47,7 +47,7 @@ describe("Search page", () => {
       body: MOCK_RESULTS,
     }).as("search");
 
-    cy.get("input").type("apple{enter}");
+    cy.get('[data-cy="search-input"]').type("apple{enter}");
 
     cy.wait("@search");
     cy.contains(`${MOCK_RESULTS.length}`).should("be.visible");
@@ -59,10 +59,10 @@ describe("Search page", () => {
       body: [],
     }).as("search");
 
-    cy.get("input").type("xyznotfound{enter}");
+    cy.get('[data-cy="search-input"]').type("xyznotfound{enter}");
 
     cy.wait("@search");
-    cy.contains("No companies found").should("be.visible");
+    cy.get('[data-cy="no-results-message"]').should("be.visible");
   });
 
   it("sends the exact query typed by the user", () => {
@@ -71,7 +71,7 @@ describe("Search page", () => {
       body: [{ name: "MICROSOFT CORP", ticker: "MSFT", cik: 789019 }],
     }).as("search");
 
-    cy.get("input").type("MSFT{enter}");
+    cy.get('[data-cy="search-input"]').type("MSFT{enter}");
 
     cy.wait("@search").its("request.url").should("include", "q=MSFT");
   });
@@ -79,7 +79,7 @@ describe("Search page", () => {
   it("does not fetch when submitting an empty input", () => {
     cy.intercept("GET", "/api/v1/edgar/search*").as("search");
 
-    cy.get("input").type("{enter}");
+    cy.get('[data-cy="search-input"]').type("{enter}");
 
     cy.wait(300);
     cy.get("@search.all").should("have.length", 0);

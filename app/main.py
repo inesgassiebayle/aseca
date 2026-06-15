@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from app.api.v1.endpoints import auth, portfolio, operations, watchlist, edgar, prices
+from app.api.v1.endpoints import auth, portfolio, operations, watchlist, edgar, prices, watchlist_compare
 from app.core.config import settings
 from app.core.whitelist import TICKER_WHITELIST
 from app.db.session import Base, engine, SessionLocal
@@ -45,6 +45,7 @@ app.include_router(operations.router, prefix="/api/v1/operations", tags=["operat
 app.include_router(watchlist.router, prefix="/api/v1/watchlist", tags=["watchlist"])
 app.include_router(edgar.router, prefix="/api/v1/edgar", tags=["edgar"])
 app.include_router(prices.router, prefix="/api/v1/prices", tags=["prices"])
+app.include_router(watchlist_compare.router, prefix="/api/v1/watchlist", tags=["watchlist-compare"])
 
 
 @app.get("/health")

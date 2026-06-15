@@ -11,7 +11,7 @@ on:
 
 jobs:
   test-api:
-    name: Test API
+    name: Test API (unit)
     runs-on: ubuntu-latest
 
     steps:
@@ -27,33 +27,27 @@ jobs:
       - name: Run unit tests
         run: pytest tests/unit -v
 
-  test-web:
-    name: Test Web (Cypress)
+  test-integration:
+    name: Test API (integration)
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-python@v5
         with:
-          node-version: "20"
+          python-version: "3.12"
 
       - name: Install dependencies
-        run: npm ci
+        run: pip install -r requirements-dev.txt
 
-      - name: Cypress run
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: web
-          build: npm run build
-          start: npm start
-          wait-on: "http://localhost:3000"
-          install: false
+      - name: Run integration tests
+        run: pytest tests/integration -v
 
   docker:
     name: Build & Push Docker Images
     runs-on: ubuntu-latest
-    needs: [test-api, test-web]
+    needs: [test-api, test-integration]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     permissions:

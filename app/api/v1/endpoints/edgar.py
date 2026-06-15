@@ -36,6 +36,13 @@ class CompanyResult(BaseModel):
     ticker: str
     cik: int
 
+class CompanyDetail(BaseModel):
+    ticker: str
+    name: str
+    cik: str
+    price: Optional[float]
+    updated_at: Optional[str]
+
 class Filing(BaseModel):
     type: str
     date: str
@@ -79,17 +86,28 @@ class CompanyDetailOut(BaseModel):
 
 @router.get("/search", response_model=list[CompanyResult])
 def search_companies(
-    q: str = Query(..., description="Nombre parcial o ticker exacto de la empresa"),
-    service: EdgarService = Depends(get_edgar_service),
+        q: str = Query(..., description="Nombre parcial o ticker exacto de la empresa"),
+        service: EdgarService = Depends(get_edgar_service),
 ):
     return service.search_companies(q)
 
 
+@router.get("/company/{ticker}", response_model=CompanyDetail)
+def get_company(
+        ticker: str,
+        service: EdgarService = Depends(get_edgar_service),
+):
+    company = service.get_company(ticker)
+    if not company:
+        raise HTTPException(status_code=404, detail=f"Empresa {ticker} no encontrada")
+    return company
+
+
 @router.get("/company/{cik}/financials", response_model=CompanyDetailOut)
 def get_company_financials(
-    cik: str,
-    ticker: str = Query(default=""),
-    service: CompanyDetailService = Depends(get_company_detail_service),
+        cik: str,
+        ticker: str = Query(default=""),
+        service: CompanyDetailService = Depends(get_company_detail_service),
 ):
     result = service.get_company_detail(cik, ticker)
     out = CompanyDetailOut(
@@ -124,10 +142,10 @@ def get_filings(cik: int, service: EdgarService = Depends(get_edgar_service)):
 
 @router.get("/companies/{cik}/metrics/{metric}", response_model=MetricHistoryResponse)
 def get_metric_history(
-    cik: int,
-    metric: str,
-    quarters: Annotated[int, Query(ge=1, le=8)] = 8,
-    service: EdgarService = Depends(get_edgar_service),
+        cik: int,
+        metric: str,
+        quarters: Annotated[int, Query(ge=1, le=8)] = 8,
+        service: EdgarService = Depends(get_edgar_service),
 ):
     try:
         result = service.get_metric_history(cik=cik, metric=metric, quarters=quarters)

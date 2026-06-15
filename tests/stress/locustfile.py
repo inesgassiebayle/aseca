@@ -38,24 +38,10 @@ SLOs de referencia (load test):
 import os
 import random
 import uuid
+from locust import HttpUser, task, between, TaskSet
 
-from locust import HttpUser, LoadTestShape, task, between, constant, TaskSet, events
 
-# ── Modo de test ──────────────────────────────────────────────────────────────
-
-TEST_MODE = os.getenv("TEST_MODE", "load").lower()
-
-if TEST_MODE not in ("load", "stress"):
-    raise ValueError(f"TEST_MODE debe ser 'load' o 'stress', recibido: '{TEST_MODE}'")
-
-# ── Constantes de la aplicación ───────────────────────────────────────────────
-
-BASE_URL        = "/api/v1/auth"
-BASE_PORTFOLIO  = "/api/v1/portfolio"
-BASE_OPERATIONS = "/api/v1/operations"
-EDGAR_URL       = "/api/v1/edgar"
-PRICES_URL      = "/api/v1/prices"
-BASE_WATCHLIST  = "/api/v1/watchlist"
+BASE_URL = "/api/v1/auth"
 
 SHARED_USER_EMAIL    = "stress_user@test.com"
 SHARED_USER_PASSWORD = "StressPass123"

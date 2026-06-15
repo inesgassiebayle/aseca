@@ -39,8 +39,9 @@ class PriceService:
             existing = self.db.query(StockPrice).filter(StockPrice.ticker == ticker).first()
             if existing:
                 existing.price = price
+                existing.updated_at = now
             else:
-                self.db.add(StockPrice(ticker=ticker, price=price))
+                self.db.add(StockPrice(ticker=ticker, price=price, updated_at=now))
             updated += 1
 
         failed = len(failed_tickers)

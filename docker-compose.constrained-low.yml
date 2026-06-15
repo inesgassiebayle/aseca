@@ -1,0 +1,24 @@
+# Perfil LOW — recursos muy limitados.
+# API: 0.25 CPU / 256 MB | DB: 0.25 CPU / 128 MB
+# Esperado: degradación visible ya en Escalón 1 (60 VU).
+
+services:
+  api:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+        reservations:
+          cpus: "0.10"
+          memory: 128M
+
+  db:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.10"
+          memory: 64M

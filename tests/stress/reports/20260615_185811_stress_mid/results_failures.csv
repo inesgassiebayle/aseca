@@ -1,0 +1,39 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/operations/ [GET],RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T22:13:30Z,2026-06-15T22:13:30Z
+GET,/api/v1/prices/last-update,RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T21:59:51Z,2026-06-15T21:59:51Z
+GET,/api/v1/edgar/search [cached],RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T21:59:51Z,2026-06-15T21:59:51Z
+POST,/api/v1/auth/register [setup],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/auth/register [setup]'),12,2026-06-15T22:07:09Z,2026-06-15T22:12:29Z
+GET,/api/v1/watchlist/compare [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/watchlist/compare [GET]'),13,2026-06-15T22:08:58Z,2026-06-15T22:15:29Z
+POST,/api/v1/watchlist/ [POST setup],RemoteDisconnected('Remote end closed connection without response'),2,2026-06-15T22:13:30Z,2026-06-15T22:13:30Z
+DELETE,/api/v1/watchlist/{ticker} [DELETE],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/watchlist/{ticker} [DELETE]'),4,2026-06-15T22:10:45Z,2026-06-15T22:15:03Z
+POST,/api/v1/watchlist/ [POST],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/watchlist/ [POST]'),17,2026-06-15T22:08:58Z,2026-06-15T22:15:28Z
+GET,/api/v1/edgar/company/{cik}/financials,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/edgar/company/{cik}/financials'),11,2026-06-15T22:09:42Z,2026-06-15T22:15:09Z
+GET,/api/v1/portfolio/{ticker} [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/portfolio/{ticker} [GET]'),8,2026-06-15T22:09:44Z,2026-06-15T22:15:08Z
+POST,/api/v1/watchlist/ [POST],HTTPError('401 Client Error: Unauthorized for url: /api/v1/watchlist/ [POST]'),63,2026-06-15T22:07:39Z,2026-06-15T22:17:33Z
+GET,/api/v1/prices/last-update,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/prices/last-update'),8,2026-06-15T22:09:06Z,2026-06-15T22:13:14Z
+POST,/api/v1/auth/login,RemoteDisconnected('Remote end closed connection without response'),3,2026-06-15T22:12:05Z,2026-06-15T22:12:28Z
+POST,/api/v1/portfolio/sell [POST],RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T22:14:00Z,2026-06-15T22:14:00Z
+POST,/api/v1/auth/login [setup],RemoteDisconnected('Remote end closed connection without response'),7,2026-06-15T22:07:09Z,2026-06-15T22:12:29Z
+GET,/api/v1/edgar/companies/{cik}/filings [cached],RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T21:59:50Z,2026-06-15T21:59:50Z
+POST,/api/v1/auth/login,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/auth/login'),31,2026-06-15T22:09:43Z,2026-06-15T22:15:39Z
+GET,/api/v1/prices/{ticker},HTTPError('500 Server Error: Internal Server Error for url: /api/v1/prices/{ticker}'),10,2026-06-15T22:07:37Z,2026-06-15T22:14:37Z
+GET,/api/v1/watchlist/compare/history [GET],HTTPError('401 Client Error: Unauthorized for url: /api/v1/watchlist/compare/history [GET]'),9,2026-06-15T22:14:08Z,2026-06-15T22:17:25Z
+GET,/api/v1/portfolio/ [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/portfolio/ [GET]'),9,2026-06-15T22:10:55Z,2026-06-15T22:14:33Z
+GET,/api/v1/watchlist/ [GET],HTTPError('401 Client Error: Unauthorized for url: /api/v1/watchlist/ [GET]'),57,2026-06-15T22:07:16Z,2026-06-15T22:17:30Z
+GET,/api/v1/operations/ [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/operations/ [GET]'),7,2026-06-15T22:08:57Z,2026-06-15T22:15:08Z
+POST,/api/v1/portfolio/sell [POST],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/portfolio/sell [POST]'),2,2026-06-15T22:11:52Z,2026-06-15T22:11:59Z
+POST,/api/v1/auth/login [setup],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/auth/login [setup]'),8,2026-06-15T22:13:28Z,2026-06-15T22:14:00Z
+GET,/api/v1/operations/ [GET],HTTPError('401 Client Error: Unauthorized for url: /api/v1/operations/ [GET]'),28,2026-06-15T22:14:08Z,2026-06-15T22:17:33Z
+GET,/api/v1/watchlist/ [GET],RemoteDisconnected('Remote end closed connection without response'),3,2026-06-15T22:13:28Z,2026-06-15T22:13:41Z
+GET,/api/v1/portfolio/ [GET],HTTPError('401 Client Error: Unauthorized for url: /api/v1/portfolio/ [GET]'),42,2026-06-15T22:13:28Z,2026-06-15T22:17:33Z
+GET,/api/v1/watchlist/ [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/watchlist/ [GET]'),11,2026-06-15T22:10:43Z,2026-06-15T22:15:39Z
+GET,/api/v1/watchlist/compare [GET],HTTPError('401 Client Error: Unauthorized for url: /api/v1/watchlist/compare [GET]'),27,2026-06-15T22:14:08Z,2026-06-15T22:17:31Z
+GET,/api/v1/watchlist/compare/history [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/watchlist/compare/history [GET]'),5,2026-06-15T22:12:58Z,2026-06-15T22:15:08Z
+POST,/api/v1/watchlist/ [POST setup],HTTPError('401 Client Error: Unauthorized for url: /api/v1/watchlist/ [POST setup]'),10,2026-06-15T22:13:00Z,2026-06-15T22:14:28Z
+POST,/api/v1/portfolio/buy [POST],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/portfolio/buy [POST]'),10,2026-06-15T22:11:58Z,2026-06-15T22:15:07Z
+POST,/api/v1/portfolio/sell [POST],HTTPError('401 Client Error: Unauthorized for url: /api/v1/portfolio/sell [POST]'),18,2026-06-15T22:14:38Z,2026-06-15T22:17:08Z
+POST,/api/v1/portfolio/buy [POST],HTTPError('401 Client Error: Unauthorized for url: /api/v1/portfolio/buy [POST]'),29,2026-06-15T22:12:58Z,2026-06-15T22:17:31Z
+GET,/api/v1/edgar/company/{cik}/financials [cached],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/edgar/company/{cik}/financials [cached]'),31,2026-06-15T22:03:16Z,2026-06-15T22:15:34Z
+POST,/api/v1/auth/register,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/auth/register'),9,2026-06-15T22:12:07Z,2026-06-15T22:15:03Z
+GET,/api/v1/portfolio/ [GET],RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T22:14:00Z,2026-06-15T22:14:00Z
+GET,/api/v1/portfolio/{ticker} [GET],HTTPError('401 Client Error: Unauthorized for url: /api/v1/portfolio/{ticker} [GET]'),24,2026-06-15T22:14:03Z,2026-06-15T22:17:28Z

@@ -1,0 +1,50 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/edgar/companies/{cik}/metrics/{metric} [cached],RemoteDisconnected('Remote end closed connection without response'),4,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/edgar/search [cached],"ConnectionRefusedError(61, 'Connection refused')",3294,2026-06-15T21:44:06Z,2026-06-15T21:58:00Z
+GET,/api/v1/operations/ [GET],RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/prices/last-update,RemoteDisconnected('Remote end closed connection without response'),2,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/watchlist/compare/history [GET],"ConnectionRefusedError(61, 'Connection refused')",1653,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+GET,/api/v1/edgar/search,RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T21:41:13Z,2026-06-15T21:41:13Z
+GET,/api/v1/edgar/search [cached],RemoteDisconnected('Remote end closed connection without response'),5,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/edgar/companies/{cik}/filings,"ConnectionRefusedError(61, 'Connection refused')",1750,2026-06-15T21:44:07Z,2026-06-15T21:57:59Z
+GET,/api/v1/watchlist/ [GET],"ConnectionRefusedError(61, 'Connection refused')",5757,2026-06-15T21:44:06Z,2026-06-15T21:57:58Z
+POST,/api/v1/watchlist/ [POST],RemoteDisconnected('Remote end closed connection without response'),5,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+POST,/api/v1/watchlist/ [POST setup],RemoteDisconnected('Remote end closed connection without response'),6,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+POST,/api/v1/auth/register,RemoteDisconnected('Remote end closed connection without response'),2,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/portfolio/{ticker} [GET],"ConnectionRefusedError(61, 'Connection refused')",1925,2026-06-15T21:44:07Z,2026-06-15T21:57:59Z
+POST,/api/v1/auth/login,RemoteDisconnected('Remote end closed connection without response'),6,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+POST,/api/v1/portfolio/sell [POST],RemoteDisconnected('Remote end closed connection without response'),3,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+POST,/api/v1/auth/login [setup],RemoteDisconnected('Remote end closed connection without response'),12,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/edgar/companies/{cik}/filings [cached],RemoteDisconnected('Remote end closed connection without response'),7,2026-06-15T21:41:13Z,2026-06-15T21:44:05Z
+GET,/api/v1/prices/{ticker},RemoteDisconnected('Remote end closed connection without response'),2,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+POST,/api/v1/auth/register [setup],"ConnectionRefusedError(61, 'Connection refused')",46,2026-06-15T21:47:00Z,2026-06-15T21:52:02Z
+GET,/api/v1/portfolio/ [GET],"ConnectionRefusedError(61, 'Connection refused')",5587,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+POST,/api/v1/watchlist/ [POST],"ConnectionRefusedError(61, 'Connection refused')",6561,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+POST,/api/v1/watchlist/ [POST setup],"ConnectionRefusedError(61, 'Connection refused')",27,2026-06-15T21:47:00Z,2026-06-15T21:52:02Z
+GET,/api/v1/prices/{ticker},"ConnectionRefusedError(61, 'Connection refused')",3202,2026-06-15T21:44:06Z,2026-06-15T21:57:57Z
+GET,/api/v1/watchlist/ [GET],RemoteDisconnected('Remote end closed connection without response'),3,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/watchlist/compare [GET],"ConnectionRefusedError(61, 'Connection refused')",2396,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+DELETE,/api/v1/watchlist/{ticker} [DELETE],"ConnectionRefusedError(61, 'Connection refused')",17,2026-06-15T21:44:08Z,2026-06-15T21:44:28Z
+GET,/api/v1/edgar/company/{cik}/financials [cached],"ConnectionRefusedError(61, 'Connection refused')",5065,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+GET,/api/v1/edgar/companies/{cik}/metrics/{metric},RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+POST,/api/v1/portfolio/buy [POST],RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/operations/ [GET],"ConnectionRefusedError(61, 'Connection refused')",3728,2026-06-15T21:44:06Z,2026-06-15T21:58:00Z
+GET,/api/v1/watchlist/whitelist,"ConnectionRefusedError(61, 'Connection refused')",1639,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+GET,/api/v1/prices/last-update,"ConnectionRefusedError(61, 'Connection refused')",3307,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+GET,/api/v1/watchlist/compare/history [GET],RemoteDisconnected('Remote end closed connection without response'),4,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/edgar/company/{cik}/financials,RemoteDisconnected('Remote end closed connection without response'),2,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+POST,/api/v1/auth/register,"ConnectionRefusedError(61, 'Connection refused')",3395,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+POST,/api/v1/auth/login,"ConnectionRefusedError(61, 'Connection refused')",9888,2026-06-15T21:44:06Z,2026-06-15T21:58:00Z
+POST,/api/v1/auth/login [setup],"ConnectionRefusedError(61, 'Connection refused')",38,2026-06-15T21:47:00Z,2026-06-15T21:52:02Z
+POST,/api/v1/portfolio/buy [POST],"ConnectionRefusedError(61, 'Connection refused')",3602,2026-06-15T21:44:06Z,2026-06-15T21:57:57Z
+DELETE,/api/v1/watchlist/{ticker} [DELETE],RemoteDisconnected('Remote end closed connection without response'),2,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/edgar/companies/{cik}/metrics/{metric} [cached],"ConnectionRefusedError(61, 'Connection refused')",3301,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+GET,/api/v1/edgar/companies/{cik}/metrics/{metric},"ConnectionRefusedError(61, 'Connection refused')",1659,2026-06-15T21:44:08Z,2026-06-15T21:57:54Z
+GET,/api/v1/edgar/companies/{cik}/metrics/{metric} [cached],"ChunkedEncodingError(ProtocolError('Connection broken: IncompleteRead(0 bytes read, 745 more expected)', IncompleteRead(0 bytes read, 745 more expected)))",1,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/portfolio/ [GET],RemoteDisconnected('Remote end closed connection without response'),4,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/edgar/companies/{cik}/filings,RemoteDisconnected('Remote end closed connection without response'),1,2026-06-15T21:41:13Z,2026-06-15T21:41:13Z
+GET,/api/v1/edgar/company/{cik}/financials [cached],RemoteDisconnected('Remote end closed connection without response'),5,2026-06-15T21:44:05Z,2026-06-15T21:44:05Z
+GET,/api/v1/edgar/search,"ConnectionRefusedError(61, 'Connection refused')",1674,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+GET,/api/v1/edgar/company/{cik}/financials,"ConnectionRefusedError(61, 'Connection refused')",1700,2026-06-15T21:44:06Z,2026-06-15T21:57:58Z
+GET,/api/v1/edgar/companies/{cik}/filings [cached],"ConnectionRefusedError(61, 'Connection refused')",3432,2026-06-15T21:44:06Z,2026-06-15T21:57:59Z
+POST,/api/v1/portfolio/sell [POST],"ConnectionRefusedError(61, 'Connection refused')",1882,2026-06-15T21:44:06Z,2026-06-15T21:57:57Z

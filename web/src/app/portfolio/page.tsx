@@ -59,7 +59,7 @@ export default function PortfolioPage() {
             <header className="flex items-center justify-between">
                 <div>
                     <div className="chip mb-3">Portfolio</div>
-                    <h1 className="display text-5xl md:text-6xl grad-text">My holdings</h1>
+                    <h1 data-cy="portfolio-title" className="display text-5xl md:text-6xl grad-text">My holdings</h1>
                 </div>
 
             </header>
@@ -68,7 +68,7 @@ export default function PortfolioPage() {
                 <section className="card-modern p-8 md:p-10">
                     <div className="grid md:grid-cols-[1.4fr_1fr] gap-8 md:items-end">
                         <div>
-                            <div className="chip mb-5 flex items-center gap-1.5">
+                            <div data-cy="total-portfolio-value-label" className="chip mb-5 flex items-center gap-1.5">
                                 <span className="size-1.5 rounded-full bg-primary" />
                                 Total portfolio value
                             </div>
@@ -89,7 +89,7 @@ export default function PortfolioPage() {
 
                         <div className="grid grid-cols-2 gap-3">
                             <div className="rounded-2xl border border-hairline bg-surface/60 p-4 flex flex-col justify-between min-h-[88px]">
-                                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Cost basis</span>
+                                <span data-cy="cost-basis-label" className="text-[11px] uppercase tracking-wider text-muted-foreground">Cost basis</span>
                                 <span className="mono text-xs mt-2">{fmtMoney(totalCost)}</span>
                             </div>
                             <div className="rounded-2xl border border-hairline bg-surface/60 p-4 flex flex-col justify-between min-h-[88px]">
@@ -97,12 +97,13 @@ export default function PortfolioPage() {
                                 <span className="text-base font-medium mt-2">{positions.length}</span>
                             </div>
                             <div className="rounded-2xl border border-hairline bg-surface/60 p-4 flex flex-col justify-between min-h-[88px]">
-                                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Updated</span>
+                                <span data-cy="updated-label" className="text-[11px] uppercase tracking-wider text-muted-foreground">Updated</span>
                                 <span className="mono text-xs mt-2">
                         {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : "—"}
                     </span>
                             </div>
                             <button
+                                data-cy="new-position-btn"
                                 onClick={() => setBuyOpen(true)}
                                 className="rounded-2xl bg-primary text-primary-foreground p-4 flex flex-col justify-between hover:opacity-90 transition-opacity glow-primary min-h-[88px] text-left"
                             >
@@ -132,7 +133,7 @@ export default function PortfolioPage() {
                 </div>
 
                 {positions.length === 0 && (
-                    <div className="px-5 py-10 text-center text-muted-foreground text-sm">
+                    <div data-cy="empty-portfolio-message" className="px-5 py-10 text-center text-muted-foreground text-sm">
                         No tenés posiciones todavía. ¡Comprá tu primera acción!
                     </div>
                 )}

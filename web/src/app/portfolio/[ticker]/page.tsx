@@ -77,10 +77,11 @@ export default function PositionDetailPage() {
     return (
         <main className="max-w-6xl mx-auto px-6 py-12 space-y-8">
             <button
+                data-cy="back-to-portfolio"
                 onClick={() => router.push("/portfolio")}
                 className="chip hover:text-foreground transition-colors w-fit"
             >
-                ← Back
+                ← Portfolio
             </button>
 
             {/* Hero — same layout as Lovable company detail */}
@@ -159,7 +160,7 @@ export default function PositionDetailPage() {
             {/* Operations */}
             <section>
                 <header className="flex items-baseline justify-between mb-4 px-1">
-                    <h2 className="text-xl font-medium">Operations</h2>
+                    <h2 data-cy="operations-heading" className="text-xl font-medium">Operations</h2>
                     <span className="chip">{detail.operations.length} transactions</span>
                 </header>
 

@@ -71,7 +71,7 @@ function SearchContent() {
             <main className="max-w-3xl mx-auto px-6 py-12 space-y-8">
                 <LastUpdateBadge/>
         <header>
-          <h1 className="display text-5xl grad-text">Find a company</h1>
+          <h1 data-cy="search-title" className="display text-5xl grad-text">Find a company</h1>
         </header>
 
         <form onSubmit={handleSearch} className="card-modern flex items-center gap-3 px-5 py-4">
@@ -80,6 +80,7 @@ function SearchContent() {
             : <Search className="size-4 text-muted-foreground shrink-0" />
           }
           <input
+            data-cy="search-input"
             autoFocus
             value={inputQ}
             onChange={(e) => setInputQ(e.target.value)}
@@ -93,7 +94,7 @@ function SearchContent() {
 
         {!loading && searched && results.length === 0 && (
           <div className="text-center py-12 space-y-1">
-            <p className="text-muted-foreground text-sm">No companies found for &ldquo;{urlQ}&rdquo;</p>
+            <p data-cy="no-results-message" className="text-muted-foreground text-sm">No companies found for &ldquo;{urlQ}&rdquo;</p>
             <p className="text-[12px] text-muted-foreground/50">
               Try a ticker like <span className="mono">AAPL</span> or a name like Apple
             </p>

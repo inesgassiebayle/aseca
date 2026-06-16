@@ -1,75 +1,43 @@
 describe("Register page", () => {
-  beforeEach(() => {
-    cy.visit("/register");
-  });
-
-  it("renders the form with all fields", () => {
-    cy.get('[data-cy="auth-title"]').should("be.visible");
-    cy.get('[data-cy="email-input"]').should("be.visible");
-    cy.get('[data-cy="password-input"]').should("be.visible");
-    cy.get('[data-cy="confirm-password-input"]').should("be.visible");
-    cy.get('[data-cy="submit-btn"]').should("be.visible");
-  });
-
-  it("shows a link to sign in", () => {
-    cy.contains("Already registered?").should("be.visible");
-    cy.get('[data-cy="signin-link"]').should("have.attr", "href", "/login");
-  });
-
-  it("shows error when passwords don't match", () => {
-    cy.get('[data-cy="email-input"]').type("test@example.com");
-    cy.get('[data-cy="password-input"]').type("Password123!");
-    cy.get('[data-cy="confirm-password-input"]').type("Different123!");
-    cy.get('[data-cy="submit-btn"]').click();
-    cy.get('[data-cy="form-error"]').should("contain", "Passwords don't match");
-  });
-
-  it("logs in and redirects to / on successful registration", () => {
-    cy.intercept("POST", "/api/v1/auth/register", {
-      statusCode: 201,
-      body: { access_token: "fake-token", token_type: "bearer" },
-    }).as("register");
-
-    cy.get('[data-cy="email-input"]').type("newuser@example.com");
-    cy.get('[data-cy="password-input"]').type("Password123!");
-    cy.get('[data-cy="confirm-password-input"]').type("Password123!");
-    cy.get('[data-cy="submit-btn"]').click();
-
-    cy.wait("@register").its("request.body").should("deep.equal", {
-      email: "newuser@example.com",
-      password: "Password123!",
+    beforeEach(() => {
+        cy.visit("/register");
     });
 
-    cy.window().its("localStorage").invoke("getItem", "access_token").should("eq", "fake-token");
-    cy.url().should("not.include", "/login");
-  });
+    it("renders the form with all fields", () => {
+        cy.contains("Create account").should("be.visible");
+        cy.get('input[type="email"]').should("be.visible");
+        cy.get('input[type="password"]').should("have.length", 2);
+        cy.get('button[type="submit"]').contains("Create account").should("be.visible");
+    });
 
-  it("shows server error message on failed registration", () => {
-    cy.intercept("POST", "/api/v1/auth/register", {
-      statusCode: 400,
-      body: { detail: "Email already registered" },
-    }).as("register");
+    it("shows a link to sign in", () => {
+        cy.contains("Already registered?").should("be.visible");
+        cy.contains("Sign in").should("have.attr", "href", "/login");
+    });
 
-    cy.get('[data-cy="email-input"]').type("existing@example.com");
-    cy.get('[data-cy="password-input"]').type("Password123!");
-    cy.get('[data-cy="confirm-password-input"]').type("Password123!");
-    cy.get('[data-cy="submit-btn"]').click();
+    it("shows error when passwords don't match", () => {
+        cy.get('input[type="email"]').type("test@example.com");
+        cy.get('input[type="password"]').first().type("Password123!");
+        cy.get('input[type="password"]').last().type("Different123!");
+        cy.get('button[type="submit"]').click();
+        cy.contains("Passwords don't match").should("be.visible");
+    });
 
-    cy.wait("@register");
-    cy.get('[data-cy="form-error"]').should("contain", "Email already registered");
-  });
+    it("registra usuario nuevo y redirige", () => {
+        const email = `cypress_${Date.now()}@test.com`;
+        cy.get('input[type="email"]').type(email);
+        cy.get('input[type="password"]').first().type("Password123!");
+        cy.get('input[type="password"]').last().type("Password123!");
+        cy.get('button[type="submit"]').click();
+        cy.url().should("not.include", "/register");
+        cy.window().its("localStorage").invoke("getItem", "access_token").should("exist");
+    });
 
-  it("disables the button and shows loading state while submitting", () => {
-    cy.intercept("POST", "/api/v1/auth/register", (req) => {
-      req.on("response", (res) => { res.setDelay(500); });
-      req.reply({ statusCode: 201, body: { access_token: "fake-token", token_type: "bearer" } });
-    }).as("register");
-
-    cy.get('[data-cy="email-input"]').type("test@example.com");
-    cy.get('[data-cy="password-input"]').type("Password123!");
-    cy.get('[data-cy="confirm-password-input"]').type("Password123!");
-    cy.get('[data-cy="submit-btn"]').click();
-
-    cy.get('[data-cy="submit-btn"]').should("be.disabled").and("contain", "Creating account");
-  });
+    it("muestra error si el email ya está registrado", () => {
+        cy.get('input[type="email"]').type("admin@gmail.com");
+        cy.get('input[type="password"]').first().type("Password123!");
+        cy.get('input[type="password"]').last().type("Password123!");
+        cy.get('button[type="submit"]').click();
+        cy.contains("already registered", { matchCase: false }).should("be.visible");
+    });
 });

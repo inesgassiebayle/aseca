@@ -74,7 +74,7 @@ export function BuyDialog({ open, onClose, onSuccess, defaultTicker }: Props) {
             >
                 <div>
                     <div className="chip mb-3">Trade</div>
-                    <h2 className="display text-3xl">Comprar acciones</h2>
+                    <h2 data-cy="buy-dialog-title" className="display text-3xl">Comprar acciones</h2>
                 </div>
 
                 <label className="block">
@@ -82,6 +82,7 @@ export function BuyDialog({ open, onClose, onSuccess, defaultTicker }: Props) {
                         Ticker
                     </span>
                     <input
+                        data-cy="buy-ticker-input"
                         type="text"
                         placeholder="AAPL"
                         value={ticker}
@@ -97,6 +98,7 @@ export function BuyDialog({ open, onClose, onSuccess, defaultTicker }: Props) {
                         Cantidad
                     </span>
                     <input
+                        data-cy="buy-quantity-input"
                         type="number"
                         placeholder="10"
                         min={1}
@@ -120,6 +122,7 @@ export function BuyDialog({ open, onClose, onSuccess, defaultTicker }: Props) {
                         Cancelar
                     </button>
                     <button
+                        data-cy="confirm-buy-btn"
                         type="submit"
                         disabled={loading}
                         className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-full text-[13px] font-medium glow-primary disabled:opacity-50"

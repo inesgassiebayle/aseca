@@ -56,11 +56,12 @@ export default function OperationsPage() {
         <main className="min-h-screen p-6 md:p-12 space-y-8">
             <header>
                 <div className="chip mb-3">Activity</div>
-                <h1 className="display text-5xl md:text-6xl grad-text">Transactions</h1>
+                <h1 data-cy="transactions-title" className="display text-5xl md:text-6xl grad-text">Transactions</h1>
             </header>
 
             <form onSubmit={handleFilter} className="card-modern flex items-center gap-3 px-5 py-4 max-w-sm">
                 <input
+                    data-cy="filter-ticker-input"
                     value={ticker}
                     onChange={(e) => setTicker(e.target.value)}
                     placeholder="Filter by ticker…"
@@ -96,7 +97,7 @@ export default function OperationsPage() {
                 </div>
 
                 {operations.length === 0 && (
-                    <div className="px-5 py-10 text-center text-muted-foreground text-sm">
+                    <div data-cy="empty-operations-message" className="px-5 py-10 text-center text-muted-foreground text-sm">
                         No hay operaciones registradas todavía.
                     </div>
                 )}

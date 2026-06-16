@@ -150,7 +150,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
         return (
             <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
                 <p className="text-muted-foreground">Company not found for ticker <span className="mono">{ticker}</span></p>
-                <Link href="/search" className="chip hover:text-foreground transition-colors">Back to search</Link>
+                <Link href="/search" data-cy="back-to-search" className="chip hover:text-foreground transition-colors">Back to search</Link>
             </div>
         );
     }
@@ -159,7 +159,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
         <div className="min-h-screen bg-background">
             <main className="max-w-6xl mx-auto px-6 py-12 space-y-8">
                 <div className="flex items-center justify-between">
-                    <button onClick={() => router.back()} className="chip hover:text-foreground transition-colors w-fit">
+                    <button data-cy="back-btn" onClick={() => router.back()} className="chip hover:text-foreground transition-colors w-fit">
                         ← Back
                     </button>
                     <LastUpdateBadge />
@@ -184,7 +184,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
                             <div className="mono text-4xl">
                                 {price === undefined && <Skeleton className="h-10 w-32 ml-auto" />}
                                 {price !== undefined && price !== null && `$${price.toFixed(2)}`}
-                                {price === null && <span className="text-sm text-muted-foreground/60">Price not available</span>}
+                                {price === null && <span data-cy="price-not-available" className="text-sm text-muted-foreground/60">Price not available</span>}
                             </div>
                             <div className="flex md:justify-end gap-2 mt-5">
                                 <button
@@ -209,6 +209,8 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
                     {(["overview", "financials", "filings", "metrics"] as const).map((t) => (
                         <button
                             key={t}
+                            data-cy={`tab-${t}`}
+                            data-active={tab === t ? "true" : undefined}
                             onClick={() => setTab(t)}
                             className={`px-4 py-1.5 text-[13px] rounded-full capitalize transition-colors ${
                                 tab === t ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
@@ -276,8 +278,8 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
                 {tab === "financials" && (
                     <section className="card-modern p-5">
                         <div className="flex items-center justify-between mb-4">
-                            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Financial Data · SEC EDGAR</span>
-                            {financials?.from_cache && <span className="chip">cached</span>}
+                            <span data-cy="financial-data-title" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Financial Data · SEC EDGAR</span>
+                            {financials?.from_cache && <span data-cy="cached-badge" className="chip">cached</span>}
                         </div>
                         {loadingFinancials && (
                             <div className="flex justify-center py-8">
@@ -285,18 +287,18 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
                             </div>
                         )}
                         {!loadingFinancials && financials && !financials.financials_available && (
-                            <p className="text-sm text-muted-foreground italic py-4 text-center">No XBRL financial data available for this company</p>
+                            <p data-cy="no-xbrl-message" className="text-sm text-muted-foreground italic py-4 text-center">No XBRL financial data available for this company</p>
                         )}
                         {!loadingFinancials && financials?.financials_available && (
                             <div>
                                 {[
-                                    { label: "Revenue",           metric: financials.revenue },
-                                    { label: "Net Income",        metric: financials.net_income },
-                                    { label: "EPS (basic)",       metric: financials.eps },
-                                    { label: "Total Assets",      metric: financials.total_assets },
-                                    { label: "Total Liabilities", metric: financials.total_liabilities },
-                                ].map(({ label, metric }) => (
-                                    <div key={label} className="flex items-center justify-between py-3 border-b border-hairline last:border-0">
+                                    { label: "Revenue",           key: "revenue",           metric: financials.revenue },
+                                    { label: "Net Income",        key: "net_income",        metric: financials.net_income },
+                                    { label: "EPS (basic)",       key: "eps",               metric: financials.eps },
+                                    { label: "Total Assets",      key: "total_assets",      metric: financials.total_assets },
+                                    { label: "Total Liabilities", key: "total_liabilities", metric: financials.total_liabilities },
+                                ].map(({ label, key, metric }) => (
+                                    <div key={label} data-cy={`metric-row-${key}`} className="flex items-center justify-between py-3 border-b border-hairline last:border-0">
                                         <span className="text-sm text-muted-foreground">{label}</span>
                                         {metric ? (
                                             <div className="text-right">
@@ -381,7 +383,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
                             {METRICS.map((m) => (
                                 <button
                                     key={m.key}
-                                    data-testid={`metric-btn-${m.key}`}
+                                    data-cy={`metric-btn-${m.key}`}
                                     onClick={() => setMetric(m.key)}
                                     className={`chip transition-colors ${
                                         metric === m.key ? "bg-primary text-primary-foreground" : "hover:text-foreground"
@@ -419,7 +421,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
 
                         {!loadingMetrics && metricData && metricData.data_points.length === 0 && (
                             <div className="text-center py-12">
-                                <p className="text-muted-foreground text-sm">No historical data available for this metric.</p>
+                                <p data-cy="no-metrics-message" className="text-muted-foreground text-sm">No historical data available for this metric.</p>
                             </div>
                         )}
 
@@ -429,10 +431,10 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Period end</TableHead>
-                                                <TableHead className="text-right">Value</TableHead>
-                                                <TableHead>Form</TableHead>
-                                                <TableHead>Filed</TableHead>
+                                                <TableHead data-cy="col-period-end">Period end</TableHead>
+                                                <TableHead data-cy="col-value" className="text-right">Value</TableHead>
+                                                <TableHead data-cy="col-form">Form</TableHead>
+                                                <TableHead data-cy="col-filed">Filed</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -450,7 +452,7 @@ export default function CompanyPage({ params }: { params: Promise<{ ticker: stri
                                     </Table>
                                 </div>
                                 {metricData.cached && (
-                                    <p className="text-[11px] text-muted-foreground/50 text-right" data-testid="cached-badge">
+                                    <p data-cy="cached-badge" className="text-[11px] text-muted-foreground/50 text-right">
                                         Cached · refreshes every hour
                                     </p>
                                 )}

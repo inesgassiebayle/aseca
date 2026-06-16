@@ -1,0 +1,24 @@
+# Perfil MID — recursos moderadamente limitados.
+# API: 0.50 CPU / 512 MB | DB: 0.50 CPU / 256 MB
+# Esperado: degradación visible en Escalón 2 (100 VU).
+
+services:
+  api:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+
+  db:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M

@@ -1,0 +1,17 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/watchlist/compare [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/watchlist/compare [GET]'),8,2026-06-15T21:08:19Z,2026-06-15T21:11:51Z
+DELETE,/api/v1/watchlist/{ticker} [DELETE],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/watchlist/{ticker} [DELETE]'),9,2026-06-15T21:08:19Z,2026-06-15T21:11:19Z
+POST,/api/v1/watchlist/ [POST],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/watchlist/ [POST]'),15,2026-06-15T21:08:19Z,2026-06-15T21:11:21Z
+GET,/api/v1/edgar/company/{cik}/financials,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/edgar/company/{cik}/financials'),6,2026-06-15T21:08:49Z,2026-06-15T21:12:19Z
+GET,/api/v1/portfolio/{ticker} [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/portfolio/{ticker} [GET]'),8,2026-06-15T21:08:49Z,2026-06-15T21:10:51Z
+GET,/api/v1/prices/last-update,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/prices/last-update'),6,2026-06-15T21:08:19Z,2026-06-15T21:11:19Z
+POST,/api/v1/auth/login,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/auth/login'),28,2026-06-15T21:08:19Z,2026-06-15T21:11:19Z
+GET,/api/v1/prices/{ticker},HTTPError('500 Server Error: Internal Server Error for url: /api/v1/prices/{ticker}'),10,2026-06-15T21:08:19Z,2026-06-15T21:11:49Z
+GET,/api/v1/portfolio/ [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/portfolio/ [GET]'),18,2026-06-15T21:08:19Z,2026-06-15T21:11:51Z
+GET,/api/v1/operations/ [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/operations/ [GET]'),14,2026-06-15T21:08:19Z,2026-06-15T21:11:49Z
+POST,/api/v1/portfolio/sell [POST],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/portfolio/sell [POST]'),6,2026-06-15T21:08:19Z,2026-06-15T21:11:49Z
+GET,/api/v1/watchlist/ [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/watchlist/ [GET]'),13,2026-06-15T21:08:19Z,2026-06-15T21:12:19Z
+GET,/api/v1/watchlist/compare/history [GET],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/watchlist/compare/history [GET]'),9,2026-06-15T21:08:49Z,2026-06-15T21:11:22Z
+POST,/api/v1/portfolio/buy [POST],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/portfolio/buy [POST]'),8,2026-06-15T21:08:19Z,2026-06-15T21:11:19Z
+GET,/api/v1/edgar/company/{cik}/financials [cached],HTTPError('500 Server Error: Internal Server Error for url: /api/v1/edgar/company/{cik}/financials [cached]'),21,2026-06-15T21:08:49Z,2026-06-15T21:12:19Z
+POST,/api/v1/auth/register,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/auth/register'),11,2026-06-15T21:08:19Z,2026-06-15T21:11:19Z

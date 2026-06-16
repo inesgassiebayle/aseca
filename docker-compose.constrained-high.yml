@@ -1,0 +1,24 @@
+# Perfil HIGH — recursos generosos pero acotados.
+# API: 1.0 CPU / 1 GB | DB: 0.50 CPU / 512 MB
+# Esperado: degradación recién en Escalón 3 (150 VU) o no aparece.
+
+services:
+  api:
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1024M
+        reservations:
+          cpus: "0.50"
+          memory: 512M
+
+  db:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M

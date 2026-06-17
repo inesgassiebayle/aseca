@@ -12,9 +12,9 @@ def make_detail():
     return {
         "ticker": "AAPL",
         "quantity": 10.0,
-        "avg_price": 168.42,
+        "historical_cost": 1684.2,
         "current_price": 214.30,
-        "pnl": (214.30 - 168.42) * 10,
+        "pnl": 214.3 * 10 - 1684.2,
         "operations": [
             {
                 "id": 1,

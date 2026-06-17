@@ -19,7 +19,7 @@ class Position(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     ticker = Column(String, nullable=False)
     quantity = Column(Float, nullable=False)
-    avg_price = Column(Float, nullable=False)
+    historical_cost = Column(Float, nullable=False)
     owner = relationship("User", back_populates="portfolio")
 
 

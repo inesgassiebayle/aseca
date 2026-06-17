@@ -9,17 +9,18 @@ class TestVenderAcciones:
 
     def test_venta_exitosa_parcial(self, portfolio_service, db):
         price = StockPrice(ticker="AAPL", price=214.30, updated_at=datetime.now(timezone.utc))
-        position = Position(user_id=1, ticker="AAPL", quantity=20, avg_price=168.42)
+        position = Position(user_id=1, ticker="AAPL", quantity=20, historical_cost=3368.4)
         db.query.return_value.filter.return_value.first.side_effect = [price, position]
 
         portfolio_service.sell(user_id=1, ticker="AAPL", quantity=10)
 
         assert position.quantity == 10
+        assert round(position.historical_cost, 2) == 1684.2
         db.commit.assert_called_once()
 
     def test_venta_cierra_posicion(self, portfolio_service, db):
         price = StockPrice(ticker="AAPL", price=214.30, updated_at=datetime.now(timezone.utc))
-        position = Position(user_id=1, ticker="AAPL", quantity=10, avg_price=168.42)
+        position = Position(user_id=1, ticker="AAPL", quantity=10, historical_cost=1684.2)
         db.query.return_value.filter.return_value.first.side_effect = [price, position]
 
         portfolio_service.sell(user_id=1, ticker="AAPL", quantity=10)
@@ -29,7 +30,7 @@ class TestVenderAcciones:
 
     def test_venta_cantidad_mayor_disponible_lanza_excepcion(self, portfolio_service, db):
         price = StockPrice(ticker="AAPL", price=214.30, updated_at=datetime.now(timezone.utc))
-        position = Position(user_id=1, ticker="AAPL", quantity=5, avg_price=168.42)
+        position = Position(user_id=1, ticker="AAPL", quantity=5, historical_cost=842.1)
         db.query.return_value.filter.return_value.first.side_effect = [price, position]
 
         with pytest.raises(InsufficientSharesError):

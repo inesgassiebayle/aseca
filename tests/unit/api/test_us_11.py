@@ -34,7 +34,7 @@ class TestVerPortfolioAPI:
         c, db = client
         app.dependency_overrides[get_current_user] = make_user
 
-        position = Position(id=1, user_id=1, ticker="AAPL", quantity=10, avg_price=168.42)
+        position = Position(id=1, user_id=1, ticker="AAPL", quantity=10, historical_cost=1684.2)
         price = StockPrice(ticker="AAPL", price=214.30, updated_at=datetime.now(timezone.utc))
 
         db.query.return_value.filter.return_value.all.return_value = [position]
@@ -54,7 +54,7 @@ class TestVerPortfolioAPI:
         c, db = client
         app.dependency_overrides[get_current_user] = make_user
 
-        position = Position(id=1, user_id=1, ticker="XYZ", quantity=5, avg_price=100.0)
+        position = Position(id=1, user_id=1, ticker="XYZ", quantity=5, historical_cost=500.0)
 
         db.query.return_value.filter.return_value.all.return_value = [position]
         db.query.return_value.filter.return_value.first.return_value = None

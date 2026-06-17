@@ -32,15 +32,14 @@ class PortfolioService:
             ).first()
 
         if position:
-            total_cost = position.avg_price * position.quantity + price_row.price * quantity
+            position.historical_cost += price_row.price * quantity
             position.quantity += quantity
-            position.avg_price = total_cost / position.quantity
         else:
             position = Position(
                 user_id=user_id,
                 ticker=ticker,
                 quantity=quantity,
-                avg_price=price_row.price,
+                historical_cost=price_row.price * quantity,
             )
             self.db.add(position)
 
@@ -77,6 +76,8 @@ class PortfolioService:
         if position.quantity == quantity:
             self.db.delete(position)
         else:
+            cost_per_share = position.historical_cost / position.quantity
+            position.historical_cost -= cost_per_share * quantity
             position.quantity -= quantity
 
         self.db.commit()
@@ -90,14 +91,14 @@ class PortfolioService:
             price_row = self.db.query(StockPrice).filter(StockPrice.ticker == p.ticker).first()
             current_price = price_row.price if price_row else None
 
-            pnl = (current_price - p.avg_price) * p.quantity if current_price else None
-            pnl_pct = ((current_price - p.avg_price) / p.avg_price) * 100 if current_price else None
+            pnl = (current_price * p.quantity) - p.historical_cost if current_price else None
+            pnl_pct = (pnl / p.historical_cost) * 100 if (current_price and p.historical_cost) else None
 
             result.append({
                 "id": p.id,
                 "ticker": p.ticker,
                 "quantity": p.quantity,
-                "avg_price": p.avg_price,
+                "historical_cost": p.historical_cost,
                 "current_price": current_price,
                 "current_value": current_price * p.quantity if current_price else None,
                 "price_updated_at": price_row.updated_at if price_row else None,
@@ -124,7 +125,7 @@ class PortfolioService:
         price_row = self.db.query(StockPrice).filter(StockPrice.ticker == ticker.upper()).first()
         current_price = price_row.price if price_row else None
 
-        pnl = (current_price - position.avg_price) * position.quantity if current_price else None
+        pnl = (current_price * position.quantity) - position.historical_cost if current_price else None
 
         operations = self.db.query(Operation).filter(
             Operation.user_id == user_id,
@@ -134,7 +135,7 @@ class PortfolioService:
         return {
             "ticker": position.ticker,
             "quantity": position.quantity,
-            "avg_price": position.avg_price,
+            "historical_cost": position.historical_cost,
             "current_price": current_price,
             "pnl": pnl,
             "operations": operations,
